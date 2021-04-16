@@ -1,5 +1,9 @@
 # Solve the model using value function iteration
 
+# To do:
+# Rewrite value_of_choice to vectorize
+# Vectorize inner loop in solve_VFI
+
 import numpy as np
 import tools
 import scipy.optimize as optimize
