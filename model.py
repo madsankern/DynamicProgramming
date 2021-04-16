@@ -5,7 +5,7 @@ import tools
 import scipy.optimize as optimize
 
 # To do:
-#   Use nonlinspace for grids
+# Use nonlinspace for grids
 
 # Setup household
 def setup():
