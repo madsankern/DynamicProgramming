@@ -164,7 +164,7 @@ def solve_EGM_2d(par):
         # Uncomment for debugging
         # sol.test = abs(sol.c - c_next)
     
-            # add zero consumption
+    # add zero consumption
     sol.a[0,0] = 0
     sol.c[0,0] = 0
 
