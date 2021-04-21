@@ -22,6 +22,10 @@ def setup():
     par.y = np.array([par.y1, par.y2]) # Collect income as an array
     par.pi = 0.5 # Probability parameter
     par.Pi = np.array([par.pi, 1 - par.pi]) # Probability weights
+
+    par.P_11 = 0.6 # Prob of staying in state 1
+    par.P_22 = 0.9 # Prob of staying in state 2
+    par.P = np.array([[par.P_11, 1 - par.P_11], [1 - par.P_22, par.P_22]]) # Transition matrix
     
     # Settings parameters
     par.num_a = 100 # Point in the a grid
