@@ -1,4 +1,7 @@
 # Solve problem using endogneous grid method
+# General kommentar: Først og fremmest, insane arbejde! Jeg synes dog vi bør overveje, at splitte funktionerne op, så
+# EGM-funktionerne kun omhandler for-loopet, der itererer igennem end-of-period assets, og while-loopet i stedet bliver kaldt
+# i en solver-funktion i filen "model.py", da vi på den måde adskiller hvad der er EGM og hvad der er contraction mapping.  
 
 import numpy as np
 import tools
@@ -11,6 +14,9 @@ def solve_EGM(par):
     class sol: pass    
     
     # Initial guess is like a 'last period' choice - consume everything
+    # **** Jeg tænker ikke, at vi behøver at kalde linspace-funktionen nedenunder igen, da vi jo allerede har oprettet griddet i
+    # model.py klassen. Måske kan man bare slette linjen nedenunder, og erstatte
+    # "sol.c = sol.a.copy()" med "sol.c = par.grid_a.copy()"
     sol.a = np.linspace(par.a_min,par.a_max,par.num_a+1) # a is pre descision, so for any state consume everything
     sol.c = sol.a.copy() # Consume everyting - this could be improved
     
@@ -24,7 +30,6 @@ def solve_EGM(par):
         # therefore, copy c and a grid from last iteration.
         c_next = sol.c.copy()
         a_next = sol.a.copy()
-
         # Loop over exogneous states (post decision states)
         for i_s,s in enumerate(par.grid_s):
             
@@ -138,6 +143,8 @@ def solve_EGM_2d(par):
         for i_s,s in enumerate(par.grid_s):
             
             #Next periods assets and consumption
+            # **** Måske skulle vi overveje bare at transponere par.y allerede i model.py filen. Det er f.eks. lidt forvirrende
+            # at vi transponerer i denne EGM-funktion, men ikke i ovenstående (selvom det self ikke er nødvendigt i ovenstående)
             a_plus = (1+par.r)*s + np.transpose(par.y) # Transpose for dimension to fit
 
             c_plus_1 = tools.interp_linear_1d(a_next[0,:], c_next[0,:], a_plus) # State 1

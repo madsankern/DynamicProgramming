@@ -23,8 +23,8 @@ def setup():
     par.pi = 0.5 # Probability parameter
     par.Pi = np.array([par.pi, 1 - par.pi]) # Probability weights
 
-    par.P_11 = 0.6 # Prob of staying in state 1
-    par.P_22 = 0.9 # Prob of staying in state 2
+    par.P_11 = 0.6 # Prob of staying in state 1 (unemployment state)
+    par.P_22 = 0.9 # Prob of staying in state 2 (employment state)
     par.P = np.array([[par.P_11, 1 - par.P_11], [1 - par.P_22, par.P_22]]) # Transition matrix
     
     # Settings parameters
@@ -46,7 +46,7 @@ def setup():
 def setup_grids(par):
     
     # Grid of assets
-    par.grid_a = np.linspace(par.a_min, par.a_max, par.num_a) # Maybe use non-linear grid at some point?
+    par.grid_a = np.linspace(par.a_min, par.a_max, par.num_a) # Maybe use non-linear grid at some point? *** God idé!
     
     # Exogenous grid of end-of-period assets := s_t. Used for EGM
     par.grid_s = np.linspace(par.a_min, par.a_max, par.num_a)
