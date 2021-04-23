@@ -1,4 +1,4 @@
-# load packages
+# Load packages
 import numpy as np
 import matplotlib.pyplot as plt
 plt.style.use('seaborn-whitegrid')
@@ -18,6 +18,7 @@ par = model.setup()
 # # Solve simple model EGM
 # sol_egm = egm.solve_EGM(par)
 
-# Extended model with Markov switching
-sol_egm_2d = egm.solve_EGM_2d(par)
+# Backup version
+# sol_egm_2d = egm.solve_EGM_2d(par)
 
+egm = egm.__solve_EGM_2d(par)
