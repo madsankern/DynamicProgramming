@@ -29,11 +29,11 @@ def solve_fd(par):
     pi_list = [[-0.33, 0.33], [0.33, -0.33]]
     pi = np.asarray(pi_list) # Poisson jumps
 
-    n = par.a_size * y_size # Dimension of transition matrix
+    n = a_size * y_size # Dimension of transition matrix
 
     # Initial guess on value function
-    sol.v = util.u(np.tile(a_vals,(y_size,1))*par.r /
-    np.tile(y_vals, (a_vals,1)).transpose()) / par.rho
+    sol.v = np.log(np.tile(a_vals,(y_size,1))*par.r
+                    + np.tile(y_vals,(a_size,1)).transpose())/par.rho
 
     # Skill transition matrix - check up on this
     y_transition = sparse.kron(pi, sparse.eye(a_size), format = "csr")
@@ -48,16 +48,16 @@ def solve_fd(par):
     is_forward = np.zeros((y_size,a_size),'bool') # indicators
     is_backward = np.zeros((y_size,a_size),'bool') # indicators
     diag_helper = np.zeros((y_size,a_size))        
-    A = z_transition.copy()
-    B = z_transition.copy()
-    AT = z_transition.copy()
+    A = y_transition.copy()
+    B = y_transition.copy()
+    AT = y_transition.copy()
 
     sol.it = 0 # Iteration counter
     sol.delta = 1000.0 # Difference between iterations
     Delta = 1000
 
     # Iterate value function
-    while (sol.delta >= par.tol_fd and sol.it < par.max_iter):
+    while (sol.delta >= tol_fd and sol.it < par.max_iter):
 
         # compute saving and consumption implied by current guess for value function, using upwind method
         dv = (sol.v[:,1:]-sol.v[:,:-1])/da
@@ -81,7 +81,7 @@ def solve_fd(par):
         #plt.plot(self.a_vals, self.c0.transpose())
         #plt.show()
 
-        self.c0 = util.u(self.c0,par)
+        c0 = util.u(c0,par)
         
         # Build the matrix A that summarizes the evolution of the process for (a,z)
         # This is a Poisson transition matrix (aka intensity matrix) with rows adding up to zero
@@ -95,7 +95,7 @@ def solve_fd(par):
         A += sparse.spdiags(np.hstack((0,diag_helper)),1,n,n)
         # Solve the system of linear equations corresponding to implicit finite difference scheme
         B = sparse.eye(n)*(1/Delta + par.rho) - A
-        b = c0.reshape(n,1) + v.reshape(n,1)/Delta
+        b = c0.reshape(n,1) + sol.v.reshape(n,1)/Delta
         v_old = sol.v.copy()
         sol.v = spsolve(B,b).reshape(y_size,a_size)
 
@@ -103,7 +103,8 @@ def solve_fd(par):
         sol.delta = np.amax(np.absolute(v_old-sol.v).reshape(n))
         sol.it += 1
 
-sol.A = A
-sol.c = cf
+    sol.A = A
+    sol.c = cf
+    sol.a = a_vals
 
-return sol
+    return sol
