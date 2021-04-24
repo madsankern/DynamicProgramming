@@ -1,6 +1,9 @@
-To do:
+To do (computational):
 Vectorize 2d egm (done)
 Solve vfi for discrete state markov process
 Implement continuous time method
 Check if the extended housing model can be solved by Jeppes method
 Implement nested (vfi/vfi)(vfi/egm) for housing model
+
+To do (theoretical):
+Theoretical convergence properties of time iteration and hence egm
