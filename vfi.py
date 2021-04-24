@@ -57,7 +57,7 @@ def value_of_choice(x,a,a_next,v_next,par):
     for i in [0,1]:
         
         # Next periods state for each income level
-        a_plus = par.y[i] + (1+par.r)*(a - c)
+        a_plus = par.y[0][i] + (1+par.r)*(a - c)
         
         #Interpolate continuation given state a_plus
         v_plus = tools.interp_linear_1d_scalar(a_next,v_next,a_plus)
