@@ -91,7 +91,7 @@ def solve_EGM_2d(par):
             c_plus_1 = tools.interp_linear_1d(a_next[0,:], c_next[0,:], a_plus) # State 1
             c_plus_2 = tools.interp_linear_1d(a_next[1,:], c_next[1,:], a_plus) # State 2
 
-            #Combine into a vector. Rows indicate current state, columns indicate next periods state
+            #Combine into a vector. Rows indicate income state, columns indicate asset state
             c_plus = np.vstack((c_plus_1, c_plus_2))
 
             # Marginal utility
