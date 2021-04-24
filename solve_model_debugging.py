@@ -21,4 +21,4 @@ par = model.setup()
 # Backup version
 # sol_egm_2d = egm.solve_EGM_2d(par)
 
-egm = egm.__solve_EGM_2d(par)
+egm = egm.solve_EGM_2d(par)
