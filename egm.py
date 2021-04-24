@@ -5,7 +5,6 @@
 
 import numpy as np
 import tools
-import scipy.optimize as optimize
 import utility as util
 
 def solve_EGM(par):
