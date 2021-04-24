@@ -1,5 +1,5 @@
 To do:
-Vectorize 2d egm
+Vectorize 2d egm (done)
 Solve vfi for discrete state markov process
 Implement continuous time method
 Check if the extended housing model can be solved by Jeppes method
