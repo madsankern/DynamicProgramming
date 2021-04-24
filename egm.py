@@ -34,7 +34,7 @@ def solve_EGM(par):
         for i_s,s in enumerate(par.grid_s):
             
             #Next periods assets and consumption
-            a_plus = (1+par.r)*s + par.y # post decision state. Note vector
+            a_plus = (1+par.r)*s + par.y[0] # post decision state. Note vector
             c_plus = tools.interp_linear_1d(a_next, c_next, a_plus)
             
             # Marginal utility of next periods consumption
@@ -67,7 +67,7 @@ def solve_EGM_2d(par):
     class sol: pass    
     
     # Initial guess is like a 'last period' choice - consume everything
-    sol.a = np.tile(np.linspace(par.a_min,par.a_max,par.num_a+1), (2,1)) # a is pre descision, so for any state consume everything. Do not use magic numbers for shape (2,1)
+    sol.a = np.tile(np.linspace(par.a_min,par.a_max,par.num_a+1), np.shape(par.y.transpose())) # a is pre descision, so for any state consume everything.
     sol.c = sol.a.copy() # Consume everyting - this could be improved
 
     sol.it = 0 # Iteration counter
@@ -85,7 +85,7 @@ def solve_EGM_2d(par):
         for i_s,s in enumerate(par.grid_s):
             
             #Next periods assets and consumption
-            a_plus = (1+par.r)*s + np.transpose(par.y) # Transpose for dimension to fit
+            a_plus = (1+par.r)*s + np.transpose(par.y[0]) # Transpose for dimension to fit
 
             # Interpolate next periods consumption - can this be combined?
             c_plus_1 = tools.interp_linear_1d(a_next[0,:], c_next[0,:], a_plus) # State 1
