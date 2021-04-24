@@ -5,6 +5,12 @@ Implement continuous time method
 Check if the extended housing model can be solved by Jeppes method
 Implement nested (vfi/vfi)(vfi/egm) for housing model
 
+Add following line of code to solve_model() in order to call vfi_2d function: 
+
+# Solve Markov switching with VFI
+sol_vfi_2d = vfi.solve_VFI_2d(par)
+
+
 To do (theoretical):
 Theoretical convergence properties of time iteration and hence egm
 Intuition for why intensities must sum to 0 for continuous poisson jump process
