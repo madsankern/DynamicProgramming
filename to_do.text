@@ -7,3 +7,4 @@ Implement nested (vfi/vfi)(vfi/egm) for housing model
 
 To do (theoretical):
 Theoretical convergence properties of time iteration and hence egm
+Intuition for why intensities must sum to 0 for continuous poisson jump process
