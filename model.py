@@ -37,6 +37,9 @@ def setup():
 
     # We need to figure out the correct tolerance. EGM is much more sensitive to the tolerance of choice
 
+    # Extra parameters for FD/continuous time model
+    par.rho = 0.04 # Discount factor    
+
     #Setup grids
     setup_grids(par)
 
