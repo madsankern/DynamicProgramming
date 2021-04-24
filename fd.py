@@ -14,7 +14,7 @@ def solve_fd(par):
 
     # Setup some remaining parameters (move to model.py later)
     da = (par.a_max - par.a_min)/(par.num_a - 1) # finite approx for derivative
-    y_list = [1, 2]
+    y_list = [1, 1.5]
     y_vals = np.asarray(y_list) # Revisited income process
     y_size = (len(y_vals)) 
  
@@ -26,7 +26,7 @@ def solve_fd(par):
     max_iter = 500
     tol_fd = 1e-6
 
-    pi_list = [[-0.33, 0.33], [0.33, -0.33]]
+    pi_list = [[-0.5, 0.5], [0.1, -0.1]]
     pi = np.asarray(pi_list) # Poisson jumps
 
     n = a_size * y_size # Dimension of transition matrix
