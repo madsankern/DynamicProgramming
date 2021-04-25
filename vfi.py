@@ -58,7 +58,7 @@ def value_of_choice(x,a,a_next,v_next,par):
     for i in [0,1]:
         
         # Next periods state for each income level
-        a_plus = par.y[0][i] + (1+par.r)*(a - c)
+        a_plus = par.y[i] + (1+par.r)*(a - c)
         
         #Interpolate continuation given state a_plus
         v_plus = tools.interp_linear_1d_scalar(a_next,v_next,a_plus)
@@ -75,7 +75,8 @@ def solve_VFI_2d(par):
 
     # Initialize solution class
     class sol: pass
-    sol.c = np.tile(par.grid_a.copy(), np.shape(par.y.transpose())) # Initial guess is to consume everything for each state
+    shape = (np.size(par.y),1)
+    sol.c = np.tile(par.grid_a.copy(), shape) # Initial guess is to consume everything for each state
     sol.v = util.u(sol.c,par) # Utility of consumption
     sol.a = par.grid_a.copy() # Copy the exogenous asset grid for consistency (with EGM algortihm)
 
@@ -130,7 +131,7 @@ def value_of_choice_2d(x,a,a_next,v_next,par,state):
         for i in [0,1]:
         
             # Next periods state for each income level
-            a_plus = par.y[0][i] + (1+par.r)*(a - c)
+            a_plus = par.y[i] + (1+par.r)*(a - c)
         
             #Interpolate continuation given state a_plus
             v_plus = tools.interp_linear_1d_scalar(a_next,v_next,a_plus)
@@ -143,7 +144,7 @@ def value_of_choice_2d(x,a,a_next,v_next,par,state):
         for i in [0,1]:
         
             # Next periods state for each income level
-            a_plus = par.y[0][i] + (1+par.r)*(a - c)
+            a_plus = par.y[i] + (1+par.r)*(a - c)
         
             #Interpolate continuation given state a_plus
             v_plus = tools.interp_linear_1d_scalar(a_next,v_next,a_plus)
