@@ -13,7 +13,7 @@ def setup():
     
     # Deep parameters
     par.beta = 0.98 # discount rate
-    par.eta = 1 # Elasticity parameter - not used right now
+    par.eta = 1.0 # Elasticity parameter
 
     # Institutional parameters
     par.r = 0.01 # net rate of return (must be lower than 1/beta i think)
@@ -40,6 +40,7 @@ def setup():
     par.max_iter = 500 # Maximum nr of iterations
     par.tol_vfi = 10e-4 # Tolerance for convergence (VFI)
     par.tol_egm = 10e-4 # Tolerance for convergence (EGM)
+    par.tol_fd = 10e-6
 
     # We need to figure out the correct tolerance. EGM is much more sensitive to the tolerance of choice
 
