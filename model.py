@@ -17,9 +17,15 @@ def setup():
 
     # Institutional parameters
     par.r = 0.01 # net rate of return (must be lower than 1/beta i think)
-    par.y1 = 1.0 # Low income
-    par.y2 = 1.5 # High income
-    par.y = np.array([[par.y1, par.y2]]) # Collect income as an array
+    # par.y1 = 1.0 # Low income
+    # par.y2 = 1.5 # High income
+    # par.y = np.array([[par.y1, par.y2]]) # Collect income as an array
+
+    # Income process
+    par.y1 = 1.0
+    par.y2 = 1.5
+    par.y = np.array([par.y1, par.y2])
+
     par.pi = 0.5 # Probability parameter
     par.Pi = np.array([par.pi, 1 - par.pi]) # Probability weights
 
