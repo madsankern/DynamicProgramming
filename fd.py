@@ -1,44 +1,43 @@
-# Implement the finite difference algorithm
+#################################
+## Finite Difference algorithm ##
+#################################
 
+# Imports
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import sparse
 from scipy.sparse.linalg import spsolve
-
-import utility as util # Import our utility package
+import utility as util
 
 def solve_fd(par):
 
     # Initialize solution class
     class sol: pass
 
-    # Setup some remaining parameters (move to model.py later)
-    da = (par.a_max - par.a_min)/(par.num_a - 1) # finite approx for derivative
-    y_list = [1, 1.5]
-    y_vals = np.asarray(y_list) # Revisited income process
-    y_size = (len(y_vals)) 
- 
+    # Setup some remaining parameters
+    da = (par.a_max - par.a_min)/(par.num_a - 1) # Finite approx for derivative
+    y_vals = par.y # Income process
+    y_size = (len(y_vals)) # Number of states in income process
+
     # Rename for ease
     a_size = par.num_a
     a_vals = par.grid_a
 
-    # Iteratrion parameters
-    max_iter = 500
-    tol_fd = 1e-6
+    # Poisson jumps - move to model.py
+    pi_list = [[-0.1, 0.1], [0.1, -0.1]]
+    pi = np.asarray(pi_list)
 
-    pi_list = [[-0.5, 0.5], [0.1, -0.1]]
-    pi = np.asarray(pi_list) # Poisson jumps
+    # Dimension of transition matrix
+    n = a_size * y_size 
 
-    n = a_size * y_size # Dimension of transition matrix
+    # Initial guess on value function = Stay put
+    sol.v = util.u(np.tile(a_vals,(y_size,1))*par.r
+                    + np.tile(y_vals,(a_size,1)).transpose(),par)/par.rho
 
-    # Initial guess on value function
-    sol.v = np.log(np.tile(a_vals,(y_size,1))*par.r
-                    + np.tile(y_vals,(a_size,1)).transpose())/par.rho
-
-    # Skill transition matrix - check up on this
+    # Skill transition matrix
     y_transition = sparse.kron(pi, sparse.eye(a_size), format = "csr")
 
-    # Preallocation
+    # Preallocation of memory
     v_old = np.zeros((y_size, a_size))
     dv = np.zeros((y_size, a_size-1))
     cf = np.zeros((y_size, a_size-1))
@@ -54,34 +53,34 @@ def solve_fd(par):
 
     sol.it = 0 # Iteration counter
     sol.delta = 1000.0 # Difference between iterations
-    Delta = 1000
+    Delta = 1000 # Check this out
 
-    # Iterate value function
-    while (sol.delta >= tol_fd and sol.it < par.max_iter):
+    # Iterate the discretized HJB equation
+    while (sol.delta >= par.tol_fd and sol.it < par.max_iter):
 
-        # compute saving and consumption implied by current guess for value function, using upwind method
-        dv = (sol.v[:,1:]-sol.v[:,:-1])/da
-        cf = util.inv_marg_u(dv,par) # FOC from HJB
-
+        # Saving and consumption implied by current guess for value function, using upwind method
+        dv = (sol.v[:,1:]-sol.v[:,:-1])/da # Derivative of value function
+        cf = util.inv_marg_u(dv*(1+par.r),par) # FOC from HJB
         c0 = np.tile(a_vals,(y_size,1))*par.r \
-                        + np.tile(y_vals,(a_size,1)).transpose()
+                        + np.tile(y_vals,(a_size,1)).transpose() # Instantaneous income
 
-        # computes savings with forward forward difference and backward difference
+        # Savings with forward forward difference and backward difference - FIND OUT WHETHER TO MULTIPLY CF WITH R OR NOT
         ssf[:,:-1] = c0[:,:-1] - cf
         ssb[:,1:] = c0[:,1:] - cf
+
         # Note that the boundary conditions are handled implicitly as ssf will be zero at a_max and ssb at a_min 
         is_forward = ssf > 0
         is_backward = ssb < 0
+
         # Update consumption based on forward or backward difference based on direction of drift
         c0[:,:-1] += (cf - c0[:,:-1])*is_forward[:,:-1]
         c0[:,1:] += (cf - c0[:,1:])*is_backward[:,1:]
-        
-        ######
+               
         # UNCOMMENT FOR DEBUGGING
-        #plt.plot(self.a_vals, self.c0.transpose())
+        #plt.plot(self.a_vals, self.c0.transpose())#
         #plt.show()
 
-        c0 = util.u(c0,par)
+        c0 = util.u(c0,par) # Check this out
         
         # Build the matrix A that summarizes the evolution of the process for (a,z)
         # This is a Poisson transition matrix (aka intensity matrix) with rows adding up to zero
@@ -93,16 +92,18 @@ def solve_fd(par):
         A += sparse.spdiags(diag_helper[1:],-1,n,n)
         diag_helper = (ssf*is_forward/da).reshape(n)
         A += sparse.spdiags(np.hstack((0,diag_helper)),1,n,n)
+
         # Solve the system of linear equations corresponding to implicit finite difference scheme
         B = sparse.eye(n)*(1/Delta + par.rho) - A
         b = c0.reshape(n,1) + sol.v.reshape(n,1)/Delta
         v_old = sol.v.copy()
         sol.v = spsolve(B,b).reshape(y_size,a_size)
 
-        # Compute convergence metric and stop if it satisfies the convergence criterion
+        # Check distance between previous iteration and update iteration counter
         sol.delta = np.amax(np.absolute(v_old-sol.v).reshape(n))
         sol.it += 1
 
+    # Unpack solution - Add what is needed here
     sol.A = A
     sol.c = cf
     sol.a = a_vals
