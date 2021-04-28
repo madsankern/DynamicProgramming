@@ -1,5 +1,3 @@
 __pycache__/
 *.pyc
-.ipynb_checkpoints/fd-checkpoint.py
-.ipynb_checkpoints/solve_model-checkpoint.ipynb
-.ipynb_checkpoints/vfi-checkpoint.py
+.ipynb_checkpoints/
