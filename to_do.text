@@ -18,3 +18,4 @@ Theoretical convergence properties of time iteration and hence egm
 Intuition for why intensities must sum to 0 for continuous poisson jump process
 Think about limitations for comparison between the algorithms
 Consider whether the continuous time solution is robust to small changes in the model
+Plot distance parameter for each state value function to determine whether one converges faster
