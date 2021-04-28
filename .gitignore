@@ -1,0 +1,15 @@
+
+*.pyc
+.ipynb_checkpoints/fd-checkpoint.py
+.ipynb_checkpoints/solve_model-checkpoint.ipynb
+.ipynb_checkpoints/vfi-checkpoint.py
+.ipynb_checkpoints/solve_model-checkpoint.ipynb
+.ipynb_checkpoints/solve_model-checkpoint.ipynb
+*.pyc
+*.pyc
+__pycache__/vfi.cpython-37.pyc
+__pycache__/utility.cpython-37.pyc
+__pycache__/model.cpython-37.pyc
+__pycache__/egm.cpython-37.pyc
+.ipynb_checkpoints/solve_model-checkpoint.ipynb
+__pycache__/vfi.cpython-37.pyc
