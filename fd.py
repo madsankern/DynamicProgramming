@@ -49,7 +49,7 @@ def solve_fd(par):
     diag_helper = np.zeros((y_size,a_size))        
     A = y_transition.copy()
     B = y_transition.copy()
-    AT = y_transition.copy()
+    # AT = y_transition.copy()
 
     sol.it = 0 # Iteration counter
     sol.delta = 1000.0 # Difference between iterations
