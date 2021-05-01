@@ -172,6 +172,10 @@ def value_of_choice_2d(x,a,a_next,v_next,par,state):
 #plt.show()
 
 # Attempt with 2 choice variables
+#### Notes: Fordi vi skal løse problemet i to dele, så er vi nødt til at lave et if-statement, så det ene problem kun kører, når h_min>a. Hvis 
+#### h_min>a og vi OGSÅ forsøger at løse problemet med h bounded mellem h_min og a, så kan vi jo ikke få nogen løsninger der overholder budget constraint, da valg 
+#### af housing ikke er feasible. f.eks. hvis vi kun har a=2 og h_min=4
+#### Idéen har derfor været kun at køre problemet, hvor der vælges consumption så længe h_min > a, og else køre begge problemer, og sammenligne i sidstnævnte scenarie
 def solve_VFI_2dfull(par):
 
     # Initialize solution class
@@ -193,24 +197,77 @@ def solve_VFI_2dfull(par):
 
          # Loop over asset grid
         for i_a,a in enumerate(par.grid_a):
+            arguments = [a,] #### Se link for idé: https://stackoverflow.com/questions/54611746/scipy-minimize-how-to-pass-args-to-both-the-objective-and-the-constraint
+            constraint = {'type': 'ineq', 'fun': feasibility_constraint, 'args': arguments}
             
-            # Minimize the minus the value function wrt consumption conditional on unemployment state
-            obj_fun = lambda x : - value_of_choice_2dfull(x,a,par.grid_a,v_next[0,:],par,1)
-            res_1 = optimize.minimize_scalar(obj_fun, bounds=[0,a+1.0e-4], method='bounded')
+            if par.h_min > a:
+                ### THIS IS ESSENTIALLY THE SAME PROBLEM AS BEFORE IN SCALAR-CASE. (Maybe we should use minimize_scalar, if it is faster)
 
-            # Minimize the minus the value function wrt consumption conditional on employment state
-            obj_fun = lambda x : - value_of_choice_2dfull(x,a,par.grid_a,v_next[1,:],par,0)
-            res_2 = optimize.minimize_scalar(obj_fun, bounds=[0,a+1.0e-4], method='bounded')
-            
-            # Unpack solutions
-            # State 1
-            sol.v[0,i_a] = -res_1.fun
-            sol.c[0,i_a] = res_1.x
+                #####
+                ## DEBUG SOMEWHERE AROUND HERE ##
+                #####
 
-            # State 2
-            sol.v[1,i_a] = -res_2.fun
-            sol.c[1,i_a] = res_2.x
+                # Initial guess, x0
+                x0 = np.zeros(2)
+                # Minimize the minus the value function wrt consumption conditional on unemployment state
+                #obj_fun = lambda x : - value_of_choice_2dfull(x,a,par.grid_a,v_next[0,:],par,1)
+                # Note: we now use optimize.minimize, instead of optimize.minimize_scalar.
+                res_1 = optimize.minimize(objective_fun, x0, method='SLSQP', args = (a,par.grid_a,v_next[0,:],par,1), bounds = np.array([[1e-8,a+1.0e-4],[0,0]]), constraints = constraint)
 
+                # # Minimize the minus the value function wrt consumption conditional on employment state
+                # obj_fun = lambda x : - value_of_choice_2dfull(x,a,par.grid_a,v_next[1,:],par,0)
+                # res_2 = optimize.minimize(obj_fun, x0, method='SLSQP', bounds = np.array([[1e-8,a+1.0e-4],[0,0]]), constraints = constraint)
+
+                # Unpack solutions
+                # State 1
+                sol.v[0,i_a] = -res_1.fun
+                sol.c[0,i_a] = res_1.x[0]
+                sol.h[0,i_a] = res_1.x[1]
+
+                # # State 2
+                # sol.v[1,i_a] = -res_2.fun
+                # sol.c[1,i_a] = res_2.x[0]
+                # sol.h[1,i_a] = res_2.x[1]
+            else:
+                ### COMPUTE SOLUTION WITH h=0, AND h element of h_min and a, AND COMPARE SOLUTIONS
+                # Initial guess, x0
+                x0 = np.zeros(2)
+                # Minimize the minus the value function wrt consumption conditional on unemployment state
+                obj_fun = lambda x : - value_of_choice_2dfull(x,a,par.grid_a,v_next[0,:],par,1)
+                res_1 = optimize.minimize(obj_fun, x0, method='SLSQP', bounds = np.array([[1e-8,a+1.0e-4],[0,0]]), constraints = constraint)
+
+                # Minimize the minus the value function wrt consumption conditional on employment state
+                obj_fun = lambda x : - value_of_choice_2dfull(x,a,par.grid_a,v_next[1,:],par,0)
+                res_2 = optimize.minimize(obj_fun, x0, method='SLSQP', bounds = np.array([[1e-8,a+1.0e-4],[0,0]]), constraints = constraint)
+
+                # Initial guess, x0
+                x0 = np.zeros(2)
+                # Minimize the minus the value function wrt consumption conditional on unemployment state
+                obj_fun = lambda x : - value_of_choice_2dfull(x,a,par.grid_a,v_next[0,:],par,1)
+                res_3 = optimize.minimize(obj_fun, x0, method='SLSQP', bounds = np.array([[1e-8,a+1.0e-4],[par.h_min,a+1.0e-4]]), constraints = constraint)
+
+                # Minimize the minus the value function wrt consumption conditional on employment state
+                obj_fun = lambda x : - value_of_choice_2dfull(x,a,par.grid_a,v_next[1,:],par,0)
+                res_4 = optimize.minimize(obj_fun, x0, method='SLSQP', bounds = np.array([[1e-8,a+1.0e-4],[par.h_min,a+1.0e-4]]), constraints = constraint)
+
+                # Unpack solutions
+                # State 1
+                sol.v[0,i_a] = max(-res_1.fun,-res_3.fun)
+                if -res_1.fun>=-res_3.fun:
+                    sol.c[0,i_a] = res_1.x[0]
+                    sol.h[0,i_a] = 0
+                else:
+                    sol.c[0,i_a] = res_3.x[1]
+                    sol.h[0,i_a] = res_3.x[1]
+
+                # State 2
+                sol.v[0,i_a] = max(-res_2.fun,-res_4.fun)
+                if -res_2.fun>=-res_4.fun:
+                    sol.c[0,i_a] = res_2.x[0]
+                    sol.h[0,i_a] = 0
+                else:
+                    sol.c[0,i_a] = res_4.x[1]
+                    sol.h[0,i_a] = res_4.x[1]
             # Update iteration parameters
         sol.it += 1
         sol.delta = max( max(abs(sol.v[0] - v_next[0])), max(abs(sol.v[1] - v_next[1]))) # check this, is this optimal  
@@ -219,11 +276,11 @@ def solve_VFI_2dfull(par):
             
             
 # Function that returns value of consumption choice conditional on the state
-def value_of_choice_2dfull(x,a,a_next,v_next,par,state):
+def value_of_choice_2dfull(c,h,a,a_next,v_next,par,state):
     
     # Unpack consumption (choice variable)
-    c = x[0]
-    h = x[1]
+    #c = x[0]
+    #h = x[1]
 
     # Intialize expected continuation value
     Ev_next = 0.0
@@ -259,19 +316,15 @@ def value_of_choice_2dfull(x,a,a_next,v_next,par,state):
 
     return v_guess
 
-def feasibility_constraint(x,par,a):
+def objective_fun(x,a,a_next,v_next,par,state):
+    # Unpack consumption (choice variable)
+    c = x[0]
+    h = x[1]
+    return -value_of_choice_2dfull(c,h,a,a_next,v_next,par,state)
+
+def feasibility_constraint(x,a):
     # Ensure that consumption and housing jointly cannot exceed cash on hands
     c = x[0]
     h = x[1]
-    return c+par.hp*h-a
-
-def bounds_consumption(a):
-    # Define bounds for consumption choices
-    bounds_c = (0,a+1.0e-4)
-    return bounds_c
-
-def bounds_housing(a): # Skal tage par som input når vi bruger h_min
-    # Define bounds for housing choices
-    bounds_h = (0,a+1.0e-4)
-    return bounds_h
+    return a-c-1*h # Note par.hp=1 is hard-coded for now, since it is not easy to pass arguments to constraints when solving
     
