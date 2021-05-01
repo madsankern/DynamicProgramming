@@ -14,9 +14,14 @@ def setup():
     # Deep parameters
     par.beta = 0.98 # discount rate
     par.eta = 1.0 # Elasticity parameter
+    par.alpha = 0.8 # alpha>1. Parameter for housing utility which takes the form, b*h^a
+    par.b = 1 # Parameter for housing utility which takes the form, b*h^a
+
 
     # Institutional parameters
     par.r = 0.01 # net rate of return (must be lower than 1/beta i think)
+    par.hp = 1 # Housing price
+    par.hp_min = 5 # Minimum house size
     # par.y1 = 1.0 # Low income
     # par.y2 = 1.5 # High income
     # par.y = np.array([[par.y1, par.y2]]) # Collect income as an array

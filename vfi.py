@@ -156,9 +156,6 @@ def value_of_choice_2d(x,a,a_next,v_next,par,state):
 
     return v_guess
 
-
-
-    
 # Copy below into solve.model() file to plot policy functions:
     
 # Plot some stuff
@@ -173,3 +170,108 @@ def value_of_choice_2d(x,a,a_next,v_next,par,state):
 #ax.set_xlim([-1,20])
 #ax.legend(frameon=True)
 #plt.show()
+
+# Attempt with 2 choice variables
+def solve_VFI_2dfull(par):
+
+    # Initialize solution class
+    class sol: pass
+    shape = (np.size(par.y),1)
+    sol.c = np.tile(par.grid_a.copy(), shape) # Initial guess is to consume everything for each state
+    sol.h = np.zeros(np.shape(sol.c)) # Initial guess for housing is therefore zero for each state
+    sol.v = util.u_with_housing(sol.c,sol.h,par) # Utility of consumption
+    sol.a = par.grid_a.copy() # Copy the exogenous asset grid for consistency (with EGM algortihm)
+
+    sol.it = 0 # Iteration counter
+    sol.delta = 1000.0 # Difference between two iterations
+
+    # Iterate value function until convergence or break if no convergence
+    while (sol.delta >= par.tol_vfi and sol.it < par.max_iter):
+        
+        # Use last iteration as the continuation value. See slides if confused
+        v_next = sol.v.copy()
+
+         # Loop over asset grid
+        for i_a,a in enumerate(par.grid_a):
+            
+            # Minimize the minus the value function wrt consumption conditional on unemployment state
+            obj_fun = lambda x : - value_of_choice_2dfull(x,a,par.grid_a,v_next[0,:],par,1)
+            res_1 = optimize.minimize_scalar(obj_fun, bounds=[0,a+1.0e-4], method='bounded')
+
+            # Minimize the minus the value function wrt consumption conditional on employment state
+            obj_fun = lambda x : - value_of_choice_2dfull(x,a,par.grid_a,v_next[1,:],par,0)
+            res_2 = optimize.minimize_scalar(obj_fun, bounds=[0,a+1.0e-4], method='bounded')
+            
+            # Unpack solutions
+            # State 1
+            sol.v[0,i_a] = -res_1.fun
+            sol.c[0,i_a] = res_1.x
+
+            # State 2
+            sol.v[1,i_a] = -res_2.fun
+            sol.c[1,i_a] = res_2.x
+
+            # Update iteration parameters
+        sol.it += 1
+        sol.delta = max( max(abs(sol.v[0] - v_next[0])), max(abs(sol.v[1] - v_next[1]))) # check this, is this optimal  
+    
+    return sol
+            
+            
+# Function that returns value of consumption choice conditional on the state
+def value_of_choice_2dfull(x,a,a_next,v_next,par,state):
+    
+    # Unpack consumption (choice variable)
+    c = x[0]
+    h = x[1]
+
+    # Intialize expected continuation value
+    Ev_next = 0.0
+    
+    # Compute value of choice conditional on being in state 1 (unemployment state)
+    if state==1:
+        # Loop over each possible state
+        for i in [0,1]:
+        
+            # Next periods state for each income level
+            a_plus = par.y[i] + (1+par.r)*(a - par.hp*h - c)
+        
+            #Interpolate continuation given state a_plus
+            v_plus = tools.interp_linear_1d_scalar(a_next,v_next,a_plus)
+    
+            # Append continuation value to calculate expected value
+            Ev_next += par.P[0,i] * v_plus
+    # Compute value of choice conditional on being in state 2 (employment state)
+    else:
+         # Loop over each possible state
+        for i in [0,1]:
+        
+            # Next periods state for each income level
+            a_plus = par.y[i] + (1+par.r)*(a - par.hp*h - c)
+        
+            #Interpolate continuation given state a_plus
+            v_plus = tools.interp_linear_1d_scalar(a_next,v_next,a_plus)
+    
+            # Append continuation value to calculate expected value
+            Ev_next += par.P[1,i] * v_plus  
+    # Value of choice
+    v_guess = util.u_with_housing(c,h,par) + par.beta * Ev_next
+
+    return v_guess
+
+def feasibility_constraint(x,par,a):
+    # Ensure that consumption and housing jointly cannot exceed cash on hands
+    c = x[0]
+    h = x[1]
+    return c+par.hp*h-a
+
+def bounds_consumption(a):
+    # Define bounds for consumption choices
+    bounds_c = (0,a+1.0e-4)
+    return bounds_c
+
+def bounds_housing(a): # Skal tage par som input når vi bruger h_min
+    # Define bounds for housing choices
+    bounds_h = (0,a+1.0e-4)
+    return bounds_h
+    

@@ -5,9 +5,9 @@
 # Call any solver you want to check externally here
 
 # Imports and settings
-%load_ext autoreload
-%autoreload 2
-%matplotlib inline
+#%load_ext autoreload
+#%autoreload 2
+#%matplotlib inline
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -22,7 +22,7 @@ import fd
 par = model.setup()
 
 # egm = egm.solve_EGM_2d(par)
-sol_vfi = vfi.solve_VFI(par)
+sol_vfi = vfi.solve_VFI_2dfull(par)
 # fd = fd.solve_fd(par)
 
 # # Plotting

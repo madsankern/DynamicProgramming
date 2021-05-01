@@ -20,3 +20,19 @@ def marg_u(c,par):
 # Inverse marginal utility
 def inv_marg_u(u,par):
     return u**(-1/par.eta)
+
+
+
+    # Utility with housing
+def u_with_housing(c,h,par):
+
+    if par.eta == 1.0:
+        u1 = np.log(c)
+
+    else:
+        u1 = (c**(1-par.eta) - 1.0) / (1.0 - par.eta)
+    
+    u2 = par.b*h**par.alpha
+
+    u = u1 + u2
+    return u
