@@ -8,6 +8,8 @@ import numpy as np
 import tools
 import scipy.optimize as optimize
 import utility as util
+import quantecon as qe # Package for Nelder-Mead algorithm
+from numba import njit # Package for Nelder-Mead algorithm
 
 def solve_VFI(par):
     
@@ -80,6 +82,9 @@ def solve_VFI_2d(par):
     sol.v = util.u(sol.c,par) # Utility of consumption
     sol.a = par.grid_a.copy() # Copy the exogenous asset grid for consistency (with EGM algortihm)
 
+    state1 = 1 # UNEMPLOYMENT STATE Used as boolean in "value_of_choice" - Defined here for readability
+    state2 = 0 # EMPLOYMENT STATE Used as boolean in "value_of_choice" - Defined here for readability
+
     sol.it = 0 # Iteration counter
     sol.delta = 1000.0 # Difference between two iterations
 
@@ -91,13 +96,13 @@ def solve_VFI_2d(par):
 
          # Loop over asset grid
         for i_a,a in enumerate(par.grid_a):
-            
+            # FUNCTIONS BELOW CAN BE WRITTEN AS LOOP - for i=0,1 - AND BE STORED IN AN ARRAY/LIST WITH TWO ENTRIES - a la res[i]=optimize.minimize....
             # Minimize the minus the value function wrt consumption conditional on unemployment state
-            obj_fun = lambda x : - value_of_choice_2d(x,a,par.grid_a,v_next[0,:],par,1)
+            obj_fun = lambda x : - value_of_choice_2d(x,a,par.grid_a,v_next[0,:],par,state1)
             res_1 = optimize.minimize_scalar(obj_fun, bounds=[0,a+1.0e-4], method='bounded')
 
             # Minimize the minus the value function wrt consumption conditional on employment state
-            obj_fun = lambda x : - value_of_choice_2d(x,a,par.grid_a,v_next[1,:],par,0)
+            obj_fun = lambda x : - value_of_choice_2d(x,a,par.grid_a,v_next[1,:],par,state2)
             res_2 = optimize.minimize_scalar(obj_fun, bounds=[0,a+1.0e-4], method='bounded')
             
             # Unpack solutions
@@ -126,6 +131,7 @@ def value_of_choice_2d(x,a,a_next,v_next,par,state):
     Ev_next = 0.0
     
     # Compute value of choice conditional on being in state 1 (unemployment state)
+    ###### VECTORIZE THIS
     if state==1:
         # Loop over each possible state
         for i in [0,1]:
@@ -141,6 +147,7 @@ def value_of_choice_2d(x,a,a_next,v_next,par,state):
     # Compute value of choice conditional on being in state 2 (employment state)
     else:
          # Loop over each possible state
+         ###### VECTORIZE THIS
         for i in [0,1]:
         
             # Next periods state for each income level
@@ -186,6 +193,9 @@ def solve_VFI_2dfull(par):
     sol.v = util.u_with_housing(sol.c,sol.h,par) # Utility of consumption
     sol.a = par.grid_a.copy() # Copy the exogenous asset grid for consistency (with EGM algortihm)
 
+    state1 = 1 # UNEMPLOYMENT STATE Used as boolean in "value_of_choice" - Defined here for readability
+    state2 = 0 # EMPLOYMENT STATE Used as boolean in "value_of_choice" - Defined here for readability
+
     sol.it = 0 # Iteration counter
     sol.delta = 1000.0 # Difference between two iterations
 
@@ -202,11 +212,11 @@ def solve_VFI_2dfull(par):
                 ### THIS IS ESSENTIALLY THE SAME PROBLEM AS BEFORE IN SCALAR-CASE. (Maybe we should use minimize_scalar, if it is faster)
 
                # Minimize the minus the value function wrt consumption conditional on unemployment state
-                obj_fun = lambda x : - value_of_choice_2d(x,a,par.grid_a,v_next[0,:],par,1)
+                obj_fun = lambda x : - value_of_choice_2d(x,a,par.grid_a,v_next[0,:],par,state1)
                 res_1 = optimize.minimize_scalar(obj_fun, bounds=[0,a+1.0e-4], method='bounded')
 
                 # Minimize the minus the value function wrt consumption conditional on employment state
-                obj_fun = lambda x : - value_of_choice_2d(x,a,par.grid_a,v_next[1,:],par,0)
+                obj_fun = lambda x : - value_of_choice_2d(x,a,par.grid_a,v_next[1,:],par,state2)
                 res_2 = optimize.minimize_scalar(obj_fun, bounds=[0,a+1.0e-4], method='bounded')
             
                 # Unpack solutions
@@ -224,29 +234,40 @@ def solve_VFI_2dfull(par):
                 ### COMPUTE SOLUTION WITH h=0, AND h element of h_min and a, AND COMPARE SOLUTIONS
                 
                 # Minimize the minus the value function wrt consumption conditional on unemployment state
-                obj_fun = lambda x : - value_of_choice_2d(x,a,par.grid_a,v_next[0,:],par,1)
+                obj_fun = lambda x : - value_of_choice_2d(x,a,par.grid_a,v_next[0,:],par,state1)
                 res_1 = optimize.minimize_scalar(obj_fun, bounds=[0,a+1.0e-4], method='bounded')
 
                 # Minimize the minus the value function wrt consumption conditional on employment state
-                obj_fun = lambda x : - value_of_choice_2d(x,a,par.grid_a,v_next[1,:],par,0)
+                obj_fun = lambda x : - value_of_choice_2d(x,a,par.grid_a,v_next[1,:],par,state2)
                 res_2 = optimize.minimize_scalar(obj_fun, bounds=[0,a+1.0e-4], method='bounded')
                 
                 # IMPLEMENT OPTIMIZER BELOW.
                 ###
                 ### DEBUG SOMEWHERE AROUND HERE ###
                 ###
-                arguments = [a,] #### Se link for idé: https://stackoverflow.com/questions/54611746/scipy-minimize-how-to-pass-args-to-both-the-objective-and-the-constraint
+                arguments = [a,par] #### Se link for idé: https://stackoverflow.com/questions/54611746/scipy-minimize-how-to-pass-args-to-both-the-objective-and-the-constraint
                 constraint = {'type': 'ineq', 'fun': feasibility_constraint, 'args': arguments}
                 # Initial guess, x0
-                x0 = np.zeros(2)
+                #### MULTISTART GUESSES
+                #####
+                ## BEMÆRK: Den klager nogle over, at "Values in x were outside bounds during a" (lader til at den klager i første iteration) - kan ikke se hvorfor.
+                #x0 = np.array([np.zeros(2)])+np.array([1.0e-3, par.h_min+1.0e-4])
+                #x0 = np.array([np.zeros(2)])+np.array([1.0e-6, a-1.0e-4]) # It usually converges for Quasi utility with these initial values.
+                x0 = np.array([np.zeros(2)])+np.array([1.0e-3, a-1.0e-4]) # It usually converges for Quasi utility with these initial values.
+                #x0 = np.array([np.zeros(2)])+np.array([1.0e-3, (a+par.h_min)/2])
+                #x0 = np.array([np.zeros(2)])+np.array([(a-par.h_min)/2, (a+par.h_min)/2])
+                #x0 = np.array([np.zeros(2)])+np.array([a-par.h_min-1.0e-6, (a+par.h_min)/2])
+                #x0 = np.array([np.zeros(2)])+np.array([a-par.h_min-1.0e-2, par.h_min+1.0e-4])
+                
                 # Minimize the minus the value function wrt consumption conditional on unemployment state
-                res_3 = optimize.minimize(objective_fun, x0, method='SLSQP', args = (a,par.grid_a,v_next[0,:],par,1), bounds = np.array([[1e-8,a+1.0e-4],[par.h_min,a+1.0e-4]]), constraints = constraint)
-
+                #res_3 = optimize.minimize(objective_fun, x0, method='SLSQP', args = (a,par.grid_a,v_next[0,:],par,1), bounds = np.array([[1e-8,a+1.0e-4],[par.h_min,a+1.0e-4]]), constraints = constraint)
+                res_3 = optimize.minimize(objective_fun, x0, method='SLSQP', args = (a,par.grid_a,v_next[0,:],par,state1), bounds = np.array([[1.0e-4,a],[par.h_min,a+1.0e-4]]), constraints = constraint)
                 # Minimize the minus the value function wrt consumption conditional on employment state
-                res_4 = optimize.minimize(objective_fun, x0, method='SLSQP', args = (a,par.grid_a,v_next[0,:],par,0), bounds = np.array([[1e-8,a+1.0e-4],[par.h_min,a+1.0e-4]]), constraints = constraint)
-
+                #res_4 = optimize.minimize(objective_fun, x0, method='SLSQP', args = (a,par.grid_a,v_next[0,:],par,0), bounds = np.array([[1e-8,a+1.0e-4],[par.h_min,a+1.0e-4]]), constraints = constraint)
+                res_4 = optimize.minimize(objective_fun, x0, method='SLSQP', args = (a,par.grid_a,v_next[1,:],par,state2), bounds = np.array([[1.0e-4,a],[par.h_min,a+1.0e-4]]), constraints = constraint)
                 # Unpack solutions
                 # State 1
+                # NOTEE: Can maybe store res_1, res_2, res_3, and res_4 in an array/list and run code below in a loop.
                 sol.v[0,i_a] = max(-res_1.fun,-res_3.fun)
                 if -res_1.fun>=-res_3.fun:
                     sol.c[0,i_a] = res_1.x
@@ -256,17 +277,17 @@ def solve_VFI_2dfull(par):
                     sol.h[0,i_a] = res_3.x[1]
 
                 # State 2
-                sol.v[0,i_a] = max(-res_2.fun,-res_4.fun)
+                sol.v[1,i_a] = max(-res_2.fun,-res_4.fun)
                 if -res_2.fun>=-res_4.fun:
-                    sol.c[0,i_a] = res_2.x
-                    sol.h[0,i_a] = 0
+                    sol.c[1,i_a] = res_2.x
+                    sol.h[1,i_a] = 0
                 else:
-                    sol.c[0,i_a] = res_4.x[0]
-                    sol.h[0,i_a] = res_4.x[1]
+                    sol.c[1,i_a] = res_4.x[0]
+                    sol.h[1,i_a] = res_4.x[1]
             # Update iteration parameters
         sol.it += 1
         sol.delta = max( max(abs(sol.v[0] - v_next[0])), max(abs(sol.v[1] - v_next[1]))) # check this, is this optimal  
-    
+        print(sol.delta)
     return sol
             
             
@@ -317,9 +338,129 @@ def objective_fun(x,a,a_next,v_next,par,state):
     h = x[1]
     return -value_of_choice_2dfull(c,h,a,a_next,v_next,par,state)
 
-def feasibility_constraint(x,a):
+def feasibility_constraint(x,a,par):
     # Ensure that consumption and housing jointly cannot exceed cash on hands
     c = x[0]
     h = x[1]
-    return a-c-1*h # Note par.hp=1 is hard-coded for now, since it is not easy to pass arguments to constraints when solving
-    
+    return a-c-par.hp*h
+
+
+###########################
+####### NELDER-MEAD ####### - Virker ikke endnu!
+###########################
+@njit
+def objective_fun_NELDER(x,a,a_next,v_next,par,state):
+    # Unpack consumption (choice variable)
+    c = x[0]
+    h = x[1]
+
+    penalty = 0
+    if c+h > a:
+
+        penalty = 10_000*(c+h-a)
+        #c /= (c+h)/a
+        #d /= (c+h)/a
+    return value_of_choice_2dfull(c,h,a,a_next,v_next,par,state) - penalty # maximization
+
+@njit(parallel=True)
+def solve_VFI_2dfull_NELDER(par):
+    #### BEMÆRK: FUNKTIONEN SKAL INITIALISERES ANDERLEDES, NÅR MAN BRUGER NJIT - MAN KAN IKKE BRUGE CLASS.
+    # Initialize solution class
+    class sol: pass
+    shape = (np.size(par.y),1)
+    sol.c = np.tile(par.grid_a.copy(), shape) # Initial guess is to consume everything for each state
+    sol.h = np.zeros(np.shape(sol.c)) # Initial guess for housing is therefore zero for each state
+    sol.v = util.u_with_housing(sol.c,sol.h,par) # Utility of consumption
+    sol.a = par.grid_a.copy() # Copy the exogenous asset grid for consistency (with EGM algortihm)
+
+    state1 = 1 # UNEMPLOYMENT STATE Used as boolean in "value_of_choice" - Defined here for readability
+    state2 = 0 # EMPLOYMENT STATE Used as boolean in "value_of_choice" - Defined here for readability
+
+    sol.it = 0 # Iteration counter
+    sol.delta = 1000.0 # Difference between two iterations
+
+    # Iterate value function until convergence or break if no convergence
+        
+    # Use last iteration as the continuation value. See slides if confused
+    v_next = sol.v.copy()
+
+        # Loop over asset grid
+    for i_a,a in enumerate(par.grid_a):
+                    
+        if par.h_min > a:
+            ### THIS IS ESSENTIALLY THE SAME PROBLEM AS BEFORE IN SCALAR-CASE. (Maybe we should use minimize_scalar, if it is faster)
+
+            # Minimize the minus the value function wrt consumption conditional on unemployment state
+            obj_fun = lambda x : - value_of_choice_2d(x,a,par.grid_a,v_next[0,:],par,state1)
+            res_1 = optimize.minimize_scalar(obj_fun, bounds=[0,a+1.0e-4], method='bounded')
+
+            # Minimize the minus the value function wrt consumption conditional on employment state
+            obj_fun = lambda x : - value_of_choice_2d(x,a,par.grid_a,v_next[1,:],par,state2)
+            res_2 = optimize.minimize_scalar(obj_fun, bounds=[0,a+1.0e-4], method='bounded')
+        
+            # Unpack solutions
+            # State 1
+            sol.v[0,i_a] = -res_1.fun
+            sol.c[0,i_a] = res_1.x
+            sol.h[0,i_a] = 0
+
+            # State 2
+            sol.v[1,i_a] = -res_2.fun
+            sol.c[1,i_a] = res_2.x
+            sol.h[1,i_a] = 0
+
+        else:
+            ### COMPUTE SOLUTION WITH h=0, AND h element of h_min and a, AND COMPARE SOLUTIONS
+            
+            # Minimize the minus the value function wrt consumption conditional on unemployment state
+            obj_fun = lambda x : - value_of_choice_2d(x,a,par.grid_a,v_next[0,:],par,state1)
+            res_1 = optimize.minimize_scalar(obj_fun, bounds=[0,a+1.0e-4], method='bounded')
+
+            # Minimize the minus the value function wrt consumption conditional on employment state
+            obj_fun = lambda x : - value_of_choice_2d(x,a,par.grid_a,v_next[1,:],par,state2)
+            res_2 = optimize.minimize_scalar(obj_fun, bounds=[0,a+1.0e-4], method='bounded')
+            
+            # IMPLEMENT OPTIMIZER BELOW.
+            ###
+            ### DEBUG SOMEWHERE AROUND HERE ###
+            ###
+            arguments = [a,par] #### Se link for idé: https://stackoverflow.com/questions/54611746/scipy-minimize-how-to-pass-args-to-both-the-objective-and-the-constraint
+            constraint = {'type': 'ineq', 'fun': feasibility_constraint, 'args': arguments}
+            # Initial guess, x0
+            #### MULTISTART GUESSES
+            #x0 = np.array([np.zeros(2)])+np.array([1.0e-3, par.h_min+1.0e-4])
+            x0 = np.array([np.zeros(2)])+np.array([1.0e-6, a-1.0e-4]) # It usually converges for Quasi utility with these initial values.
+            #x0 = np.array([np.zeros(2)])+np.array([1.0e-3, (a+par.h_min)/2])
+            #x0 = np.array([np.zeros(2)])+np.array([(a-par.h_min)/2, (a+par.h_min)/2])
+            #x0 = np.array([np.zeros(2)])+np.array([a-par.h_min-1.0e-6, (a+par.h_min)/2])
+            #x0 = np.array([np.zeros(2)])+np.array([a-par.h_min-1.0e-2, par.h_min+1.0e-4])
+            
+            #res_3 = optimize.minimize(objective_fun, x0, method='SLSQP', args = (a,par.grid_a,v_next[0,:],par,1), bounds = np.array([[1.0e-4,a],[par.h_min,a+1.0e-4]]), constraints = constraint)
+            res_3 = qe.optimize.nelder_mead(objective_fun_NELDER,x0, 
+                    bounds = np.array([[1.0e-4,a],[par.h_min,a+1.0e-4]]), 
+                    args = (a,par.grid_a,v_next[0,:],par,1),
+                    tol_x=par.tol_vfi, 
+                    max_iter=1000)
+            #res_4 = optimize.minimize(objective_fun, x0, method='SLSQP', args = (a,par.grid_a,v_next[0,:],par,0), bounds = np.array([[1.0e-4,a],[par.h_min,a+1.0e-4]]), constraints = constraint)
+            res_4 = qe.optimize.nelder_mead(objective_fun_NELDER,x0, 
+                    bounds = np.array([[1.0e-4,a],[par.h_min,a+1.0e-4]]), 
+                    args = (a,par.grid_a,v_next[1,:],par,0),
+                    tol_x=par.tol_vfi, 
+                    max_iter=1000)
+            sol.v[0,i_a] = max(-res_1.fun,-res_3.fun)
+            if -res_1.fun>=-res_3.fun:
+                sol.c[0,i_a] = res_1.x
+                sol.h[0,i_a] = 0
+            else:
+                sol.c[0,i_a] = res_3.x[0]
+                sol.h[0,i_a] = res_3.x[1]
+
+            # State 2
+            sol.v[1,i_a] = max(-res_2.fun,-res_4.fun)
+            if -res_2.fun>=-res_4.fun:
+                sol.c[1,i_a] = res_2.x
+                sol.h[1,i_a] = 0
+            else:
+                sol.c[1,i_a] = res_4.x[0]
+                sol.h[1,i_a] = res_4.x[1]
+    return sol

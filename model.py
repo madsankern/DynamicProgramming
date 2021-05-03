@@ -12,16 +12,18 @@ def setup():
     class par: pass # Define class for parameters
     
     # Deep parameters
-    par.beta = 0.98 # discount rate
+    #par.beta = 0.98 # discount rate (ORIGINAL)
+    par.beta = 0.90 # discount rate - higher discount rate for faster convergence of VFI
     par.eta = 1.0 # Elasticity parameter
     par.alpha = 0.8 # alpha>1. Parameter for housing utility which takes the form, b*h^a
-    par.b = 1 # Parameter for housing utility which takes the form, b*h^a
+    par.b = 6 # Parameter for housing utility which takes the form, b*h^a
 
 
     # Institutional parameters
-    par.r = 0.01 # net rate of return (must be lower than 1/beta i think)
+    #par.r = 0.01 # net rate of return (must be lower than 1/beta i think) (ORIGINAL)
+    par.r = 0.035 # net rate of return (must be lower than 1/beta i think)
     par.hp = 1 # Housing price
-    par.h_min = 5 # Minimum house size
+    par.h_min = 2.3 # Minimum house size
     # par.y1 = 1.0 # Low income
     # par.y2 = 1.5 # High income
     # par.y = np.array([[par.y1, par.y2]]) # Collect income as an array
@@ -30,7 +32,7 @@ def setup():
     par.y1 = 1.0
     par.y2 = 1.5
     par.y = np.array([par.y1, par.y2])
-
+    
     par.pi = 0.5 # Probability parameter
     par.Pi = np.array([par.pi, 1 - par.pi]) # Probability weights
 
@@ -43,7 +45,7 @@ def setup():
     par.a_min = 1e-8 # Minimum assets
     par.a_max = 20 # Largest point in a grid
     par.max_iter = 500 # Maximum nr of iterations
-    par.tol_vfi = 10e-4 # Tolerance for convergence (VFI)
+    par.tol_vfi = 10e-4 # Tolerance for convergence (VFI) (ORIGINAL)
     par.tol_egm = 10e-4 # Tolerance for convergence (EGM)
     par.tol_fd = 10e-6
 
