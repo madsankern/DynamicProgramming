@@ -1,6 +1,7 @@
 # Define utility function of the households
 import numpy as np
-import model
+import model_2
+import model_1d
 
 # Utility
 def u(c,par):
