@@ -23,6 +23,7 @@ par = model.setup()
 
 # egm = egm.solve_EGM_2d(par)
 sol_vfi = vfi.solve_VFI_2dfull(par)
+#sol_vfi = vfi.solve_VFI_2dfull_NELDER(par)
 # fd = fd.solve_fd(par)
 
 # # Plotting
@@ -35,3 +36,17 @@ sol_vfi = vfi.solve_VFI_2dfull(par)
 # ax.legend(frameon=True)
 
 # plt.plot()
+
+#Plot some stuff
+fig = plt.figure(figsize=(14,5))
+ax = fig.add_subplot(1,2,1)
+ax.plot(sol_vfi.a, sol_vfi.c[0,:], linestyle = ':', color = 'red', label = '$y_1$')
+ax.plot(sol_vfi.a, sol_vfi.c[1,:], linestyle = ':', color = 'blue', label = '$y_2$')
+ax.plot(sol_vfi.a[:10], sol_vfi.a[:10], linestyle = '--', color = '0.6') # Check with 45 degree line. Seems correct
+ax.set_xlabel(f"Assets, $a_t$")
+ax.set_ylabel(f"Consumption, $c^\star_t$")
+ax.set_title(f'Policy function')
+ax.set_xlim([-1,20])
+ax.legend(frameon=True)
+plt.show()
+

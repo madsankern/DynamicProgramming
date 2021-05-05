@@ -32,7 +32,8 @@ def u_with_housing(c,h,par):
     else:
         u1 = (c**(1-par.eta) - 1.0) / (1.0 - par.eta)
     
-    u2 = par.b*h**par.alpha
+    #u2 = par.b*h**par.alpha
+    u2 = h
 
     u = u1 + u2
     return u
