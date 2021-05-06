@@ -15,11 +15,11 @@ def solve(sol, par, v_next, state1, state2):
 
         # Minimize the minus the value function wrt consumption conditional on unemployment state
         obj_fun = lambda x : - value_of_choice(x,m,par.grid_m,v_next[0,:],par,state1)
-        res_1 = optimize.minimize_scalar(obj_fun, bounds=[0,m+1.0e-4], method='bounded')
+        res_1 = optimize.minimize_scalar(obj_fun, bounds=[0+1.0e-4, m+1.0e-4], method='bounded')
 
         # Minimize the minus the value function wrt consumption conditional on employment state
         obj_fun = lambda x : - value_of_choice(x,m,par.grid_m,v_next[1,:],par,state2)
-        res_2 = optimize.minimize_scalar(obj_fun, bounds=[0,m+1.0e-4], method='bounded')
+        res_2 = optimize.minimize_scalar(obj_fun, bounds=[0+1.0e-4, m+1.0e-4], method='bounded')
         
         # Unpack solutions
         # State 1
@@ -34,6 +34,23 @@ def solve(sol, par, v_next, state1, state2):
 
 # Function that returns value of consumption choice conditional on the state
 def value_of_choice(x,m,m_next,v_next,par,state):
+    
+    # Unpack consumption (choice variable)
+    c = x
+
+    m_plus = par.y + (1 + par.r)*(m - c)
+
+    v_plus = tools.interp_linear_1d(m_next, v_next, m_plus) # Returns one point for each state
+
+    Ev_next = np.sum(par.P[state]*v_plus)
+
+    # Value of choice given choice c = x
+    value = util.u(c,par) + par.beta * Ev_next
+
+    return value
+
+# Function that returns value of consumption choice conditional on the state
+def value_of_choice_2(x,m,m_next,v_next,par,state):
     
     # Unpack consumption (choice variable)
     c = x

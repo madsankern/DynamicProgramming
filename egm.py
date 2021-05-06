@@ -32,9 +32,11 @@ def solve(sol, par, c_next, m_next):
 
     # Update iteration parameters
     sol.it += 1
-    sol.delta = max( max(abs(sol.c[0] - c_next[0])), max(abs(sol.c[1] - c_next[1]))) # check this, is this optimal
+    sol.delta = max( max(abs(sol.c[0] - c_next[0])), max(abs(sol.c[1] - c_next[1])))
 
     return sol
+
+# Unused code below
 
 def solve_EGM(par):
     

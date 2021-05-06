@@ -6,9 +6,13 @@ import tools
 from types import SimpleNamespace
 import vfi
 import egm
+import fd
 import utility as util
 import scipy.optimize as optimize
 
+# Move to fd.py
+from scipy import sparse
+from scipy.sparse.linalg import spsolve
 
 class model_1d():
 
@@ -19,7 +23,7 @@ class model_1d():
         self.par = SimpleNamespace()
         self.sol_vfi = SimpleNamespace()
         self.sol_egm = SimpleNamespace()
-        # self.sol_fd = SimpleNamespace()
+        self.sol_fd = SimpleNamespace()
 
     ###########
     ## Setup ##
@@ -33,7 +37,7 @@ class model_1d():
         par = self.par
 
         # Model
-        par.beta =  0.96
+        par.beta =  0.98
         par.rho = 1.0 - par.beta
         par.eta = 1.0
         
@@ -46,14 +50,18 @@ class model_1d():
         par.P_22 = 0.9
         par.P = np.array([[par.P_11, 1 - par.P_11], [1 - par.P_22, par.P_22]]) # Transition matrix
 
+        # Poisson jumps - rewrite to correspond to P above
+        par.pi_list = [[-0.1, 0.1], [0.1, -0.1]]
+        par.pi = np.asarray(par.pi_list)
+
         # Settings - note the naming in the grid
-        par.Na = 100 # Remember this
+        par.Na = 100
         par.a_min = 1e-8 # Slightly above 0 for numerical reasons
         par.a_max = 20 # Largest point in a grid
         par.max_iter = 500 # Maximum nr of iterations
-        par.tol_vfi = 10e-6
-        par.tol_egm = 10e-6
-        par.tol_fd = 10e-6
+        par.tol_vfi = 10e-4
+        par.tol_egm = 10e-4
+        par.tol_fd = 10e-4
         
     # Grids of assets. Either pre or post decision
     # dependent on the solver used
@@ -87,8 +95,8 @@ class model_1d():
         sol.v = util.u(sol.c,par) # Utility of consumption
         sol.m = par.grid_m.copy() # Copy the exogenous asset grid for consistency (with EGM algortihm)
 
-        state1 = 1 # UNEMPLOYMENT STATE
-        state2 = 0 # EMPLOYMENT STATE
+        state1 = 0 # UNEMPLOYMENT STATE
+        state2 = 1 # EMPLOYMENT STATE
 
         sol.it = 0 # Iteration counter
         sol.delta = 1000.0 # Distance between iterations
@@ -121,7 +129,7 @@ class model_1d():
         
         # Initial guess is like a 'last period' choice - consume everything
         sol.m = np.tile(np.linspace(par.a_min,par.a_max,par.Na+1), shape) # a is pre descision, so for any state consume everything.
-        sol.c = sol.a.copy() # Consume everyting - this could be improved
+        sol.c = sol.m.copy() # Consume everyting - this could be improved
 
         sol.it = 0 # Iteration counter
         sol.delta = 1000.0 # Difference between iterations
@@ -138,5 +146,17 @@ class model_1d():
             sol = egm.solve(sol, par, c_next, m_next)
 
         # add zero consumption
-        sol.a[:,0] = 0
+        sol.m[:,0] = 0
         sol.c[:,0] = 0
+
+    ##############################
+    ## Finite difference method ##
+    ##############################
+    
+    def solve_fd(self):
+
+        # Initialize
+        par = self.par
+        sol = self.sol_fd
+
+        sol = fd.solve(par,sol)
