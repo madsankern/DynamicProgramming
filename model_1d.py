@@ -5,6 +5,7 @@ import numpy as np
 import tools
 from types import SimpleNamespace
 import vfi
+import egm
 import utility as util
 import scipy.optimize as optimize
 
@@ -17,14 +18,14 @@ class model_1d():
         # Names
         self.par = SimpleNamespace()
         self.sol_vfi = SimpleNamespace()
-        # self.sol_egm = SimpleNamespace()
+        self.sol_egm = SimpleNamespace()
         # self.sol_fd = SimpleNamespace()
 
-        ###########
-        ## Setup ##
-        ###########
-        # Setup parameters used for all solvers
-        # for the 1d model of consumption
+    ###########
+    ## Setup ##
+    ###########
+    # Setup parameters used for all solvers
+    # for the 1d model of consumption
 
     def setup(self):
 
@@ -68,8 +69,11 @@ class model_1d():
         
         # Convert these to nonlinspace later.
         # Easier just to use two different grids
+        # for VFI and EGM
 
-        return par
+    ##############################
+    ## Value function iteration ##
+    ##############################
 
     def solve_vfi(self):
 
@@ -81,13 +85,13 @@ class model_1d():
         shape = (np.size(par.y),1) # Shape to fit nr of income states
         sol.c = np.tile(par.grid_a.copy(), shape) # Initial guess - consume all
         sol.v = util.u(sol.c,par) # Utility of consumption
-        sol.a = par.grid_m.copy() # Copy the exogenous asset grid for consistency (with EGM algortihm)
+        sol.m = par.grid_m.copy() # Copy the exogenous asset grid for consistency (with EGM algortihm)
 
         state1 = 1 # UNEMPLOYMENT STATE
         state2 = 0 # EMPLOYMENT STATE
 
         sol.it = 0 # Iteration counter
-        sol.delta = 10000.0 # Distance between iterations
+        sol.delta = 1000.0 # Distance between iterations
 
         # Iterate untill convergence
         while (sol.delta >= par.tol_vfi and sol.it < par.max_iter):
@@ -95,28 +99,44 @@ class model_1d():
             # Use last iteration as the continuation value. See slides if confused
             v_next = sol.v.copy()
 
-            # Loop over asset grid
-            for m_i,m in enumerate(par.grid_m):
-
-                # FUNCTIONS BELOW CAN BE WRITTEN AS LOOP - for i=0,1 - AND BE STORED IN AN ARRAY/LIST WITH TWO ENTRIES - a la res[i]=optimize.minimize....
-
-                # Minimize the minus the value function wrt consumption conditional on unemployment state
-                obj_fun = lambda x : - vfi.value_of_choice(x,m,par.grid_m,v_next[0,:],par,state1)
-                res_1 = optimize.minimize_scalar(obj_fun, bounds=[0,m+1.0e-4], method='bounded')
-
-                # Minimize the minus the value function wrt consumption conditional on employment state
-                obj_fun = lambda x : - vfi.value_of_choice(x,m,par.grid_m,v_next[1,:],par,state2)
-                res_2 = optimize.minimize_scalar(obj_fun, bounds=[0,m+1.0e-4], method='bounded')
-                
-                # Unpack solutions
-                # State 1
-                sol.v[0,m_i] = -res_1.fun
-                sol.c[0,m_i] = res_1.x
-
-                # State 2
-                sol.v[1,m_i] = -res_2.fun
-                sol.c[1,m_i] = res_2.x
+            # Find optimal c given v_next
+            sol = vfi.solve(sol, par, v_next, state1, state2)
                     
             # Update iteration parameters
             sol.it += 1
-            sol.delta = max( max(abs(sol.v[0] - v_next[0])), max(abs(sol.v[1] - v_next[1]))) # check this, is this optimal  
+            sol.delta = max( max(abs(sol.v[0] - v_next[0])), max(abs(sol.v[1] - v_next[1]))) # Update this maybe
+
+    #############################
+    ## Endogeneous grid method ##
+    #############################
+
+    def solve_egm(self):
+
+        # Initialize
+        par = self.par
+        sol = self.sol_egm
+
+        # Shape parameter for the solution vector
+        shape = (np.size(par.y),1)
+        
+        # Initial guess is like a 'last period' choice - consume everything
+        sol.m = np.tile(np.linspace(par.a_min,par.a_max,par.Na+1), shape) # a is pre descision, so for any state consume everything.
+        sol.c = sol.a.copy() # Consume everyting - this could be improved
+
+        sol.it = 0 # Iteration counter
+        sol.delta = 1000.0 # Difference between iterations
+
+        # Iterate value function until convergence or break if no convergence
+        while (sol.delta >= par.tol_egm and sol.it < par.max_iter):
+
+            # Use last iteration to compute the continuation value
+            # therefore, copy c and a grid from last iteration.
+            c_next = sol.c.copy()
+            m_next = sol.m.copy()
+
+            # Call EGM function here
+            sol = egm.solve(sol, par, c_next, m_next)
+
+        # add zero consumption
+        sol.a[:,0] = 0
+        sol.c[:,0] = 0
