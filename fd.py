@@ -49,7 +49,8 @@ def solve(par,sol):
 
         # Saving and consumption implied by current guess for value function, using upwind method
         dv = (sol.v[:,1:]-sol.v[:,:-1])/da # Derivative of value function
-        cf = util.inv_marg_u(dv*(1+par.r),par) # FOC from HJB
+        # cf = util.inv_marg_u(dv*(1+par.r),par) # FOC from HJB
+        cf = util.inv_marg_u(dv,par) # FOC from HJB
         c0 = np.tile(par.grid_a,(y_size,1))*par.r \
                         + np.tile(y_vals,(par.Na,1)).transpose() # Instantaneous income
 
@@ -70,7 +71,7 @@ def solve(par,sol):
         #plt.show()
 
         c0 = util.u(c0,par) # Check this out
-        
+       
         # Build the matrix A that summarizes the evolution of the process for (a,z)
         # This is a Poisson transition matrix (aka intensity matrix) with rows adding up to zero
         sol.A = y_transition.copy()
@@ -95,5 +96,6 @@ def solve(par,sol):
     # Unpack solution - Add what is needed here
     sol.c = cf
     sol.a = par.grid_a
+    sol.dv = dv
 
     return sol

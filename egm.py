@@ -47,7 +47,7 @@ def solve_EGM(par):
     # **** Jeg tænker ikke, at vi behøver at kalde linspace-funktionen nedenunder igen, da vi jo allerede har oprettet griddet i
     # model.py klassen. Måske kan man bare slette linjen nedenunder, og erstatte
     # "sol.c = sol.a.copy()" med "sol.c = par.grid_a.copy()"
-    sol.a = np.linspace(par.a_min,par.a_max,par.num_a+1) # a is pre descision, so for any state consume everything
+    sol.a = np.linspace(par.a_min,par.a_max,par.num_a) # a is pre descision, so for any state consume everything
     sol.c = sol.a.copy() # Consume everyting - this could be improved
     
     sol.it = 0 # Iteration counter

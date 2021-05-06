@@ -10,10 +10,6 @@ import fd
 import utility as util
 import scipy.optimize as optimize
 
-# Move to fd.py
-from scipy import sparse
-from scipy.sparse.linalg import spsolve
-
 class model_1d():
 
     def __init__(self,name=None):
@@ -39,11 +35,11 @@ class model_1d():
         # Model
         par.beta =  0.98
         par.rho = 1.0 - par.beta
-        par.eta = 1.0
+        par.eta = 0.5
         
         par.r = 0.01
         par.y1 = 1.0
-        par.y2 = 1.5
+        par.y2 = 2.0
         par.y = np.array([par.y1, par.y2])
         
         par.P_11 = 0.6
@@ -55,9 +51,9 @@ class model_1d():
         par.pi = np.asarray(par.pi_list)
 
         # Settings - note the naming in the grid
-        par.Na = 100
+        par.Na = 4000
         par.a_min = 1e-8 # Slightly above 0 for numerical reasons
-        par.a_max = 20 # Largest point in a grid
+        par.a_max = 50 # Largest point in a grid
         par.max_iter = 500 # Maximum nr of iterations
         par.tol_vfi = 10e-4
         par.tol_egm = 10e-4
@@ -74,7 +70,7 @@ class model_1d():
         
         # Post desicion
         par.grid_a = np.linspace(par.a_min, par.a_max, par.Na)
-        
+
         # Convert these to nonlinspace later.
         # Easier just to use two different grids
         # for VFI and EGM
@@ -98,7 +94,7 @@ class model_1d():
         state1 = 0 # UNEMPLOYMENT STATE
         state2 = 1 # EMPLOYMENT STATE
 
-        sol.it = 0 # Iteration counter
+        sol.it = 0 # Iteration counters
         sol.delta = 1000.0 # Distance between iterations
 
         # Iterate untill convergence
@@ -146,8 +142,8 @@ class model_1d():
             sol = egm.solve(sol, par, c_next, m_next)
 
         # add zero consumption
-        sol.m[:,0] = 0
-        sol.c[:,0] = 0
+        sol.m[:,0] = 1.0e-4
+        sol.c[:,0] = 1.0e-4
 
     ##############################
     ## Finite difference method ##

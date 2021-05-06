@@ -20,7 +20,7 @@ def marg_u(c,par):
 
 # Inverse marginal utility
 def inv_marg_u(u,par):
-    return u**(-1/par.eta)
+    return u**(-1.0/par.eta)
 
 
 
