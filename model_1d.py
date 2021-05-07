@@ -52,7 +52,7 @@ class model_1d():
 
         # Settings - note the naming in the grid
         par.Na = 4000
-        par.a_min = 1e-8 # Slightly above 0 for numerical reasons
+        par.a_min = 1e-4 # Slightly above 0 for numerical reasons
         par.a_max = 50 # Largest point in a grid
         par.max_iter = 500 # Maximum nr of iterations
         par.tol_vfi = 10e-4
