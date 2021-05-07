@@ -1,11 +1,10 @@
-# Solve problem using endogneous grid method
-# General kommentar: Først og  fremmest, insane arbejde! Jeg synes dog vi bør overveje, at splitte funktionerne op, så
-# EGM-funktionerne kun omhandler for-loopet, der itererer igennem end-of-periodassets, og while-loopet i stedet bliver kaldt
-# i en solver-funktion i filen "model.py", da vi på den måde adskiller hvad der er EGM og hvad der er contraction mapping.  
-
 import numpy as np
 import tools
 import utility as util
+
+######################
+## Solver using EGM ##
+######################
 
 def solve(sol, par, c_next, m_next):
 
@@ -41,7 +40,11 @@ def solve(sol, par, c_next, m_next):
 
     return sol
 
-# Unused code below
+
+
+
+
+### Unused code below ###
 
 def solve_EGM(par):
     
