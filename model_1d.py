@@ -126,6 +126,7 @@ class model_1d():
         # Initial guess is like a 'last period' choice - consume everything
         sol.m = np.tile(np.linspace(par.a_min,par.a_max,par.Na+1), shape) # a is pre descision, so for any state consume everything.
         sol.c = sol.m.copy() # Consume everyting - this could be improved
+        sol.v = util.u(sol.c,par) # Utility of consumption
 
         sol.it = 0 # Iteration counter
         sol.delta = 1000.0 # Difference between iterations
