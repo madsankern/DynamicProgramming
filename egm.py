@@ -9,6 +9,8 @@ import utility as util
 
 def solve(sol, par, c_next, m_next):
 
+    v_old = sol.v.copy()
+
     # Loop over exogneous states (post decision states)
     for a_i,a in enumerate(par.grid_a):
         
@@ -29,10 +31,13 @@ def solve(sol, par, c_next, m_next):
         # Add optimal consumption and endogenous state
         sol.c[:,a_i+1] = util.inv_marg_u((1+par.r)*par.beta*av_marg_u_plus,par)
         sol.m[:,a_i+1] = a + sol.c[:,a_i+1]
+        sol.v = util.u(sol.c,par)
 
-    # Update iteration parameters
+    #Compute valu function and update iteration parameters
+    sol.delta = max( max(abs(sol.v[0] - v_old[0])), max(abs(sol.v[1] - v_old[1])))
     sol.it += 1
-    sol.delta = max( max(abs(sol.c[0] - c_next[0])), max(abs(sol.c[1] - c_next[1])))
+
+    # sol.delta = max( max(abs(sol.c[0] - c_next[0])), max(abs(sol.c[1] - c_next[1])))
 
     return sol
 
