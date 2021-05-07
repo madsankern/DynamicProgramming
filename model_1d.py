@@ -8,7 +8,7 @@ import vfi
 import egm
 import fd
 import utility as util
-import scipy.optimize as optimize
+# import scipy.optimize as optimize
 
 class model_1d():
 
@@ -51,7 +51,8 @@ class model_1d():
         par.pi = np.asarray(par.pi_list)
 
         # Settings - note the naming in the grid
-        par.Na = 4000
+        par.Na = 500
+        par.Nm = 4000
         par.a_min = 1e-4 # Slightly above 0 for numerical reasons
         par.a_max = 50 # Largest point in a grid
         par.max_iter = 500 # Maximum nr of iterations
@@ -59,8 +60,8 @@ class model_1d():
         par.tol_egm = 10e-4
         par.tol_fd = 10e-4
         
-    # Grids of assets. Either pre or post decision
-    # dependent on the solver used
+    # Exogenous rids of assets. 
+    # Either pre or post decision dependent on the solver used
     def create_grids(self):
 
         par = self.par
@@ -72,8 +73,6 @@ class model_1d():
         par.grid_a = np.linspace(par.a_min, par.a_max, par.Na)
 
         # Convert these to nonlinspace later.
-        # Easier just to use two different grids
-        # for VFI and EGM
 
     ##############################
     ## Value function iteration ##
