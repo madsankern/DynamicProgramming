@@ -20,3 +20,6 @@ Intuition for why intensities must sum to 0 for continuous poisson jump process
 Think about limitations for comparison between the algorithms
 Consider whether the continuous time solution is robust to small changes in the model
 Plot distance parameter for each state value function to determine whether one converges faster
+
+Questions for Thomas:
+- Infinite horizon for EGM (value function convergence possible?)
