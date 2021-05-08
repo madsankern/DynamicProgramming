@@ -52,13 +52,17 @@ class model_1d():
 
         # Settings - note the naming in the grid
         par.Na = 500
-        par.Nm = 4000
         par.a_min = 1e-4 # Slightly above 0 for numerical reasons
         par.a_max = 50 # Largest point in a grid
         par.max_iter = 500 # Maximum nr of iterations
         par.tol_vfi = 10e-4
         par.tol_egm = 10e-4
         par.tol_fd = 10e-4
+
+        # Copy a grid settings to the m grid
+        par.Nm = par.Na
+        par.m_min = par.a_min
+        par.m_max = par.a_max
         
     # Exogenous rids of assets. 
     # Either pre or post decision dependent on the solver used
@@ -70,7 +74,7 @@ class model_1d():
         par.grid_m = np.linspace(par.a_min, par.a_max, par.Na)
         
         # Post desicion
-        par.grid_a = np.linspace(par.a_min, par.a_max, par.Na)
+        par.grid_a = np.linspace(par.m_min, par.m_max, par.Nm)
 
         # Convert these to nonlinspace later.
 
