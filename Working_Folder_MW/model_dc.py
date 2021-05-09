@@ -33,7 +33,7 @@ class model_dc():
         par.W = 1
         par.sigma_xi = 0.0
 
-        par.kappa = 2.0 # Housesing utility
+        par.kappa = 2.0 # Housing utility
         par.ph = 3.0 # House price
         
         par.sigma_eta = 0.0 # No stochastic income

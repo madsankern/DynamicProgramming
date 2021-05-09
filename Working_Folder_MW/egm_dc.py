@@ -93,8 +93,9 @@ def no_house(sol,z_plus,t,par):
 
     # Next period states
     m_plus = par.R*a+par.W
-
-    shape = (2,m_plus.size)
+    shape = (2,m_plus.size) # One row for each choice of housing
+    
+    #Initialize
     v_plus = np.nan+np.zeros(shape)
     c_plus = np.nan+np.zeros(shape)
     marg_u_plus = np.nan+np.zeros(shape)
@@ -115,6 +116,10 @@ def no_house(sol,z_plus,t,par):
 
     # Expected value
     V_plus, prob = logsum(v_plus[0],v_plus[1],par.sigma_eta)
+    
+    #if prob[1,:]==1
+        #par.grid_a[t,:] - ph
+    
     w_raw = V_plus
     avg_marg_u_plus = prob[0,:]*marg_u_plus[0] + prob[1,:]*marg_u_plus[1] #Expected margnal utility dependend on choice probabilities
 
