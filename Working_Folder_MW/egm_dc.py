@@ -22,7 +22,7 @@ def EGM (sol,z_plus, t,par):
 
     ## UPPER ENVELOPE ##
 
-    # Reorderining making G_m strictly increasing 
+    # Reordering making G_m strictly increasing 
     m = sorted(m_raw)  # alternatively, choose a common grid exogeneously. This, however, creates many points around the kink
     I = m_raw
     c = [x for _,x in sorted(zip(I,c_raw))]  #Check these
