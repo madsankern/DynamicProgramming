@@ -33,8 +33,8 @@ class model_dc():
         par.W = 1
         par.sigma_xi = 0.0
 
-        par.kappa = 2.0 # Housesing utility
-        par.ph = 1.5 # House price
+        par.kappa = 2.0 # Housing utility
+        par.ph = 3.0 # House price
         
         par.sigma_eta = 0.0 # No stochastic income
 
@@ -54,7 +54,7 @@ class model_dc():
         # Check parameters
         assert (par.rho >= 0), 'not rho > 0'
 
-        # Shocks. Draw from lognorma distribution, return gaussian weights and nodes 
+        # Shocks. Draw from lognormal distribution, return gaussian weights and nodes 
         par.xi,par.xi_w = tools.GaussHermite_lognorm(par.sigma_xi,par.Nxi)
         
         # End of period assets
