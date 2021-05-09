@@ -1,18 +1,8 @@
 To do (computational):
 Vectorize 2d egm (done)
 Solve vfi for discrete state markov process (done)
-Implement continuous time method (done?)
-Check if the extended housing model can be solved by Jeppes method (should be possible)
-Check the code from Jeppes paper on GITHUB - see if we can use it
-VFI for the housing model - check adjust model
-Add 'allocate' functions for all algorithms - functions to allocate memory
-
-
-Add following line of code to solve_model() in order to call vfi_2d function: 
-
-# Solve Markov switching with VFI
-sol_vfi_2d = vfi.solve_VFI_2d(par)
-
+Implement continuous time method (done)
+Ensure the EGM-DC model works as intended
 
 To do (theoretical):
 Theoretical convergence properties of time iteration and hence egm
@@ -20,3 +10,7 @@ Intuition for why intensities must sum to 0 for continuous poisson jump process
 Think about limitations for comparison between the algorithms
 Consider whether the continuous time solution is robust to small changes in the model
 Plot distance parameter for each state value function to determine whether one converges faster
+
+Questions for Thomas:
+- Infinite horizon for EGM (value function convergence possible?)
+- Why use finite (T=50) for upper envelope models

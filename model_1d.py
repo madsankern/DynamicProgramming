@@ -8,7 +8,7 @@ import vfi
 import egm
 import fd
 import utility as util
-import scipy.optimize as optimize
+# import scipy.optimize as optimize
 
 class model_1d():
 
@@ -51,16 +51,21 @@ class model_1d():
         par.pi = np.asarray(par.pi_list)
 
         # Settings - note the naming in the grid
-        par.Na = 4000
-        par.a_min = 1e-8 # Slightly above 0 for numerical reasons
+        par.Na = 500
+        par.a_min = 1e-4 # Slightly above 0 for numerical reasons
         par.a_max = 50 # Largest point in a grid
         par.max_iter = 500 # Maximum nr of iterations
         par.tol_vfi = 10e-4
         par.tol_egm = 10e-4
         par.tol_fd = 10e-4
+
+        # Copy a grid settings to the m grid
+        par.Nm = par.Na
+        par.m_min = par.a_min
+        par.m_max = par.a_max
         
-    # Grids of assets. Either pre or post decision
-    # dependent on the solver used
+    # Exogenous rids of assets. 
+    # Either pre or post decision dependent on the solver used
     def create_grids(self):
 
         par = self.par
@@ -69,11 +74,9 @@ class model_1d():
         par.grid_m = np.linspace(par.a_min, par.a_max, par.Na)
         
         # Post desicion
-        par.grid_a = np.linspace(par.a_min, par.a_max, par.Na)
+        par.grid_a = np.linspace(par.m_min, par.m_max, par.Nm)
 
         # Convert these to nonlinspace later.
-        # Easier just to use two different grids
-        # for VFI and EGM
 
     ##############################
     ## Value function iteration ##
@@ -126,6 +129,7 @@ class model_1d():
         # Initial guess is like a 'last period' choice - consume everything
         sol.m = np.tile(np.linspace(par.a_min,par.a_max,par.Na+1), shape) # a is pre descision, so for any state consume everything.
         sol.c = sol.m.copy() # Consume everyting - this could be improved
+        sol.v = util.u(sol.c,par) # Utility of consumption
 
         sol.it = 0 # Iteration counter
         sol.delta = 1000.0 # Difference between iterations
