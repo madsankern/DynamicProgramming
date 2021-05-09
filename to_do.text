@@ -13,3 +13,4 @@ Plot distance parameter for each state value function to determine whether one c
 
 Questions for Thomas:
 - Infinite horizon for EGM (value function convergence possible?)
+- Why use finite (T=50) for upper envelope models
