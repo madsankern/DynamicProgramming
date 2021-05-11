@@ -62,7 +62,7 @@ def obj_keep(arg, n, m, v_next, par):
     c = arg
 
     # End of period assets
-    m_plus = (1+par.r)*(m - c) + par.y
+    m_plus = (1+par.r)*(m - c) + par.y1
 
     # Continuation value
     v_plus = tools.interp_linear_1d_scalar(par.grid_m, v_next, m_plus)
