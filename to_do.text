@@ -1,7 +1,8 @@
 To do (computational):
-Vectorize 2d egm (done)
+(partly) Vectorize 2d egm (done)
 Solve vfi for discrete state markov process (done)
 Implement continuous time method (done)
+Vectorize EGM for the simple problem
 Ensure the EGM-DC model works as intended
 
 To do (theoretical):
