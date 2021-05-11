@@ -2,6 +2,7 @@ To do (computational):
 (partly) Vectorize 2d egm (done)
 Solve vfi for discrete state markov process (done)
 Implement continuous time method (done)
+Rename model_1d.py to 'model.py'
 Vectorize EGM for the simple problem
 Ensure the EGM-DC model works as intended
 
