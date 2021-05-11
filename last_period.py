@@ -1,14 +1,14 @@
 import utility as util
 import numpy as np
 
-# Solve the last period of the consumer problem
+# Solves the last period of the consumer problem
 
 def solve(sol, par):
 
     for n in range(2): # Loop over housing state
         for m_i,m in enumerate(par.grid_m): # Loop over exogeneous asset grid
                  
-                if n == 0 :
+                if n == 0:
 
                     # Cannot buy a house
                     if m < par.ph: 
@@ -17,9 +17,9 @@ def solve(sol, par):
 
                     # Can buy a house
                     else:
-                        u_gain = util.u_h(m, 0, par) - util.u_h(m - par.ph, 1, par) # Gain from not buying a house
+                        u_dif = util.u_h(m, 0, par) - util.u_h(m - par.ph, 1, par) # dif in utility from choice
 
-                        if u_gain >= 0:  # If not buying a house is optimal
+                        if u_dif >= 0:  # If not buying a house is optimal
                             sol.c[n,m_i] = m
                             sol.h[n,m_i] = 0
                         
@@ -27,11 +27,11 @@ def solve(sol, par):
                             sol.c[n,m_i] = m - par.ph
                             sol.h[n,m_i] = 1
 
-                if n == 1 :
+                if n == 1:
 
-                    u_gain = util.u_h(m, 1, par) - util.u_h(m + par.ph, 0, par) # Gain from not selling the house
+                    u_dif = util.u_h(m, 1, par) - util.u_h(m + par.ph, 0, par) # dif in utility from choice
 
-                    if u_gain >= 0:
+                    if u_dif >= 0:
                         sol.c[n,m_i] = m
                         sol.h[n,m_i] = 1
                     
