@@ -1,7 +1,6 @@
-# Define utility function of the households
 import numpy as np
 
-# Utility
+# Without housing
 def u(c,par):
 
     if par.eta == 1.0:
@@ -12,7 +11,7 @@ def u(c,par):
 
     return u
 
-# Utility
+# With housing
 def u_h(c,h,par):
 
     if par.eta == 1.0:
