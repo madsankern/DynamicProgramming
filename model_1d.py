@@ -20,6 +20,7 @@ class model_1d():
         # Names
         self.par = SimpleNamespace()
         self.sol_vfi = SimpleNamespace()
+        self.sol_nvfi = SimpleNamespace()
         self.sol_egm = SimpleNamespace()
         self.sol_fd = SimpleNamespace()
 
@@ -197,7 +198,7 @@ class model_1d():
 
         # Initialize
         par = self.par
-        sol = self.sol
+        sol = self.sol_nvfi
 
         # Shape parameter
         shape = (2,np.size(par.grid_m)) #  Row for each state of housing
