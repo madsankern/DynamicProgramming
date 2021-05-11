@@ -17,7 +17,7 @@ def solve(sol, par):
 
                     # Can buy a house
                     else:
-                        u_gain = util.u(m, 0, par) - util.u(m - par.ph, 1, par) # Gain from not buying a house
+                        u_gain = util.u_h(m, 0, par) - util.u_h(m - par.ph, 1, par) # Gain from not buying a house
 
                         if u_gain >= 0:  # If not buying a house is optimal
                             sol.c[n,m_i] = m
@@ -29,7 +29,7 @@ def solve(sol, par):
 
                 if n == 1 :
 
-                    u_gain = util.u(m, 1, par) - util.u(m + par.ph, 0, par) # Gain from not selling the house
+                    u_gain = util.u_h(m, 1, par) - util.u_h(m + par.ph, 0, par) # Gain from not selling the house
 
                     if u_gain >= 0:
                         sol.c[n,m_i] = m
@@ -40,4 +40,4 @@ def solve(sol, par):
                         sol.h[n,m_i] = 0
 
                 # Compute value of choice
-                sol.v[n,m_i] = util.u(sol.c[n,m_i], sol.h[n,m_i], par)
+                sol.v[n,m_i] = util.u_h(sol.c[n,m_i], sol.h[n,m_i], par)
