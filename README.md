@@ -6,4 +6,4 @@ Overview of the files:
 * egm.py is a solver using endogenous grid
 * fd.py is a solver using finite difference
 * tools.py are taken from Thomas' code. For now, we only use the interp function from this
-* last_period.py solves the consumotion-housing problem in the terminal period
+* last_period.py solves the consumption-housing problem in the terminal period
