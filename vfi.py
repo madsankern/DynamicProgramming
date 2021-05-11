@@ -4,9 +4,10 @@ import utility as util
 import scipy.optimize as optimize
 import matplotlib.pyplot as plt
 
-##################################
-#### VALUE FUNCTION ITERATION ####
-##################################
+##############################
+## Value function iteration ##
+##############################
+# This is the VFI algortihm for solving the simple consumption saving model.
 
 def solve(sol, par, v_next, state1, state2):
 
@@ -51,11 +52,15 @@ def value_of_choice(x,m,m_next,v_next,par,state):
 
     return value
 
-#########################################
-#### NESTED VALUE FUNCTION ITERATION ####
-#########################################
+#####################################
+## Nested value function iteration ##
+#####################################
+# This is the nested VFI algorithm for solving the discrete-continuous model.
+# The solution method is to solve the keeper problem where consumption is the only choice,
+# then solve the adjuster problem and find the implied value by interpolating
+# the solution of the keeper problem
 
-## Objective function for the keeper ##
+# Objective function for the keeper
 def obj_keep(arg, n, m, v_next, par):
 
     # Unpack
@@ -72,14 +77,12 @@ def obj_keep(arg, n, m, v_next, par):
 
     return value
 
-## Solution algorithm ##
+# Solution algorithm
 def solve_dc(sol, par, v_next, c_next, h_next):
 
-    ##############################
-    ## Solve the keeper problem ##
-    ##############################
+    # a. Solve the keeper problem
 
-    shape = (2,np.size(par.grid_m)) #  Row for each state of housing - move to model.py file
+    shape = (2,np.size(par.grid_m)) # Row for each state of housing - move to model.py file
 
     # Intialize
     v_keep = np.zeros(shape) + np.nan
@@ -110,9 +113,7 @@ def solve_dc(sol, par, v_next, c_next, h_next):
     # plt.plot(par.grid_m,c_keep[0])
     # plt.show()
 
-    ################################
-    ## Solve the adjuster problem ##
-    ################################
+    # b. Solve the adjuster problem
 
     # Intialize
     v_adj = np.zeros(shape) + np.nan
@@ -144,9 +145,7 @@ def solve_dc(sol, par, v_next, c_next, h_next):
                 c_adj[n,m_i] = tools.interp_linear_1d_scalar(par.grid_m, c_keep[h,:], x)
                 h_adj[n,m_i] = h
 
-    #######################
-    ## Combine solutions ##
-    #######################
+    # c. Combine solutions
 
     # Loop over asset grid again
     for n in range(2):
