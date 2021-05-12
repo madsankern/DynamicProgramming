@@ -81,7 +81,7 @@ class model_1d():
         par = self.par
         
         # Pre desicion
-        par.grid_m = np.linspace(par.m_min, par.a_max, par.Nm)
+        par.grid_m = np.linspace(par.m_min, par.m_max, par.Nm)
         
         # Post desicion
         par.grid_a = np.linspace(par.a_min, par.a_max, par.Na)
