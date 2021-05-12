@@ -164,3 +164,4 @@ def solve_dc(sol, par, v_next, c_next, h_next):
                 sol.h[n,m_i] = 1 - n
     
     return sol
+

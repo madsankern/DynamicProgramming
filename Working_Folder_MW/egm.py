@@ -119,6 +119,162 @@ def solve(sol, par, c_next, m_next):
 
 
 
+#####################################
+##          Nested EGM             ##
+#####################################
+
+# Objective function for the keeper
+def obj_keep(arg, n, m, v_next, par):
+
+    # Unpack
+    c = arg
+
+    # End of period assets
+    m_plus = (1+par.r)*(m - c) + par.y1
+
+    # Continuation value
+    v_plus = tools.interp_linear_1d_scalar(par.grid_m, v_next, m_plus)
+
+    # Value of choice
+    value = util.u_h(c,n,par) + par.beta*v_plus
+
+    return value
+
+#def solve_NEGM(par,sol):
+
+    # a. next-period cash-on-hand
+    m_plus = par['R']*par['grid_a'] + par['y']
+
+    # b. post-decision value function
+    sol['w_vec'] = np.empty(m_plus.size)
+    linear_interp.interp_1d_vec(par['grid_m'],sol['v_next'],m_plus,sol['w_vec'])
+    
+    # c. post-decision marginal value of cash
+    c_next_interp = np.empty(m_plus.size)
+    linear_interp.interp_1d_vec(par['grid_m'],sol['c_next'],m_plus,c_next_interp)
+    q = par['beta']*par['R']*marg_u(c_next_interp,par)
+
+    # d. EGM
+    sol['c_vec'] = inv_marg_u(q,par)
+    sol['m_vec'] = par['grid_a'] + sol['c_vec']
+    
+    myupperenvelope = upperenvelope.create(u) # where is the utility function
+
+    # b. apply upperenvelope
+    c_ast_vec = np.empty(par['grid_m'].size) # output
+    v_ast_vec = np.empty(par['grid_m'].size) # output
+    myupperenvelope(par['grid_a'],sol['m_vec'],sol['c_vec'],sol['w_vec'],par['grid_m'],c_ast_vec,v_ast_vec,par['rho'])
+    
+    return #sol from upperenvelope
+
+
+# Solution algorithm
+def solve_NEGM(sol, par, v_next, c_next, h_next):
+
+    # a. Solve the keeper problem
+
+    shape = (2,np.size(par.grid_m)) # Row for each state of housing - move to model.py file
+
+    # Intialize
+    v_keep = np.zeros(shape) + np.nan
+    c_keep = np.zeros(shape) + np.nan
+    h_keep = np.zeros(shape) + np.nan
+
+    # Loop over housing states
+    for n in range(2):
+
+        # Loop over asset grid
+        for m_i,m in enumerate(par.grid_m):
+            
+            # Use euler equation
+            v_keep[n,m_i] = -res.fun
+            c_keep[n,m_i] = res.x
+            h_keep[n,m_i] = n
+
+    # b. Solve the adjuster problem
+
+    # Intialize
+    v_adj = np.zeros(shape) + np.nan
+    c_adj = np.zeros(shape) + np.nan
+    h_adj = np.zeros(shape) + np.nan
+
+    # Loop over housing state
+    for n in range(2):
+
+        # Housing choice is reverse of state n if adjusting
+        h = 1 - n
+
+        # Loop over asset grid
+        for m_i,m in enumerate(par.grid_m):
+
+            # If adjustment is not possible
+            if n == 0 and m < par.ph :
+                v_adj[n,m_i] = -np.inf
+                c_adj[n,m_i] = 0
+                h_adj[n,m_i] = np.nan
+
+            else:
+
+                # Assets available after adjusting
+                x = m - par.ph*(h - n)
+
+                # Value of choice
+                v_adj[n,m_i] = tools.interp_linear_1d_scalar(par.grid_m, v_keep[h,:], x)
+                c_adj[n,m_i] = tools.interp_linear_1d_scalar(par.grid_m, c_keep[h,:], x)
+                h_adj[n,m_i] = h
+
+    # c. Combine solutions
+
+    # Loop over asset grid again
+    for n in range(2):
+        for m_i,m in enumerate(par.grid_m):
+
+            # If keeping is optimal
+            if v_keep[n,m_i] > v_adj[n,m_i]:
+                sol.v[n,m_i] = v_keep[n,m_i]
+                sol.c[n,m_i] = c_keep[n,m_i]
+                sol.h[n,m_i] = n
+
+            # If ajusting is optimal
+            else:
+                sol.v[n,m_i] = v_adj[n,m_i]
+                sol.c[n,m_i] = c_adj[n,m_i]
+                sol.h[n,m_i] = 1 - n
+    
+    return sol
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
