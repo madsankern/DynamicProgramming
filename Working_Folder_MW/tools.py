@@ -1,5 +1,5 @@
 import numpy as np
-from numba import njit, int64, double, boolean, int32,void
+from numba import njit, int64, double
 import math
 
 # interpolation functions:
@@ -25,7 +25,19 @@ def binary_search(imin,Nx,x,xi):
 
 @njit(double(double[:],double[:],double))
 def interp_linear_1d_scalar(grid,value,xi):
-    """ raw 1D interpolation """
+    """ raw 1D interpolation
+    
+    Args:
+    
+        grid (list): Grid in the domain of the func to be interpolated
+        value (lsit): Func vals associated with grid 
+        xi (list/float): Val in the domain, where the func val is to be interpolated
+        
+    Returns:
+    
+        value[xi] (list/float): Interpolated values
+        
+    """
 
     # a. search
     ix = binary_search(0,grid.size,grid,xi)
@@ -47,91 +59,6 @@ def interp_linear_1d(grid,value,xi):
         yi[ixi] = interp_linear_1d_scalar(grid,value,xi[ixi])
     
     return yi
-
-@njit(double(double[:],double[:],double[:,:],double,double,int32,int32),fastmath=True)
-def _interp_2d(grid1,grid2,value,xi1,xi2,j1,j2):
-    """ Code is from: https://github.com/NumEconCopenhagen/ConsumptionSaving, and the package can be downloaded
-    
-    2d interpolation for one point with known location
-        
-    Args:
-        grid1 (numpy.ndarray): 1d grid
-        grid2 (numpy.ndarray): 1d grid
-        value (numpy.ndarray): value array (2d)
-        xi1 (double): input point
-        xi2 (double): input point
-        j1 (int): location in grid 
-        j2 (int): location in grid
-    Returns:
-        yi (double): output
-    """
-
-    # a. left/right
-    nom_1_left = grid1[j1+1]-xi1
-    nom_1_right = xi1-grid1[j1]
-
-    nom_2_left = grid2[j2+1]-xi2
-    nom_2_right = xi2-grid2[j2]
-
-    # b. interpolation
-    denom = (grid1[j1+1]-grid1[j1])*(grid2[j2+1]-grid2[j2])
-    nom = 0
-    for k1 in range(2):
-        nom_1 = nom_1_left if k1 == 0 else nom_1_right
-        for k2 in range(2):
-            nom_2 = nom_2_left if k2 == 0 else nom_2_right                    
-            nom += nom_1*nom_2*value[j1+k1,j2+k2]
-
-    return nom/denom
-
-
-@njit(double(double[:],double[:],double[:,:],double,double),fastmath=True)
-def interp_2d(grid1,grid2,value,xi1,xi2):
-    """ Code is from: https://github.com/NumEconCopenhagen/ConsumptionSaving, and the package can be downloaded
-
-
-    2d interpolation for one point
-        
-    Args:
-        grid1 (numpy.ndarray): 1d grid
-        grid2 (numpy.ndarray): 1d grid
-        value (numpy.ndarray): value array (2d)
-        xi1 (double): input point
-        xi2 (double): input point
-    Returns:
-        yi (double): output
-    """
-
-    # a. search in each dimension
-    j1 = binary_search(0,grid1.size,grid1,xi1)
-    j2 = binary_search(0,grid2.size,grid2,xi2)
-
-    return _interp_2d(grid1,grid2,value,xi1,xi2,j1,j2)
-
-
-@njit(double[:](double[:],double[:],double[:,:],double[:],double[:]),fastmath=True)
-def interp_2d_vec(grid1,grid2,value,xi1,xi2):
-    """ Code is from: https://github.com/NumEconCopenhagen/ConsumptionSaving, and the package can be downloaded
-
-    
-    2d interpolation for vector of points
-        
-    Args:
-        grid1 (numpy.ndarray): 1d grid
-        grid2 (numpy.ndarray): 1d grid
-        value (numpy.ndarray): value array (2d)
-        xi1 (numpy.ndarray): input vector
-        xi2 (numpy.ndarray): input vector
-        yi (numpy.ndarray): output vector
-    """
-    shape = (xi1.size)
-    yi = np.nan+np.zeros(shape)
-
-    for i in range(xi1.size):
-        yi[i] = interp_2d(grid1,grid2,value,xi1[i],xi2[i])
-
-    return yi
-
 
 # State space
 def nonlinspace(x_min, x_max, n, phi):
@@ -170,13 +97,3 @@ def gauss_hermite(n):
     w = np.sqrt(math.pi)*V[:,0]**2
 
     return x,w
-
-def GaussHermite_lognorm(sigma,n):
-
-    x, w = gauss_hermite(n)
-    x = np.exp(x*math.sqrt(2)*sigma - 0.5*sigma**2)
-    w = w / math.sqrt(math.pi)
-
-    # assert a mean of one
-    assert(1 - np.sum(w*x) < 1e-8 ), 'The mean in GH-lognorm is not 1'
-    return x, w
