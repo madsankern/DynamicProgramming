@@ -133,7 +133,7 @@ def solve_dc(sol, par, v_next, c_next, h_next):
             if n == 0 and m < par.ph :
                 v_adj[n,m_i] = -np.inf
                 c_adj[n,m_i] = 0
-                h_adj[n,m_i] = h
+                h_adj[n,m_i] = np.nan
 
             else:
 
