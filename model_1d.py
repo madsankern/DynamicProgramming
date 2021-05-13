@@ -63,7 +63,7 @@ class model_1d():
         par.m_max = 10.0
         par.m_min = 1e-4
 
-        par.Na = 50
+        par.Na = 100
         par.a_min = 1e-4
         par.a_max = par.m_max + 1.0 # Check this out later
 
@@ -243,10 +243,10 @@ class model_1d():
         sol = self.sol_negm
 
         # Shape parameter
-        shape = (2,np.size(par.grid_m)) #  Row for each state of housing
+        shape = (2,np.size(par.grid_a)) #  Row for each state of housing and columns for exogenous end-of-period asset grid 
 
         # Initialize
-        sol.m = np.tile(np.linspace(par.a_min,par.a_max,par.Na+1), shape)
+        sol.m = np.zeros(shape) + np.nan
         sol.c = np.zeros(shape) + np.nan
         sol.h = np.zeros(shape) + np.nan
         sol.v = np.zeros(shape) + np.nan
@@ -269,3 +269,5 @@ class model_1d():
             sol = egm.solve_dc(sol, par, v_next, c_next, h_next)
 
             sol.it += 1
+            
+            

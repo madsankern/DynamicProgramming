@@ -29,7 +29,7 @@ def solve_dc(sol, par, v_next, c_next, h_next):
 
     # a. Solve the keeper problem
 
-    shape = (2,np.size(par.grid_m)) # Row for each state of housing - move to model.py file
+    shape = (2,np.size(par.grid_a)) # Row for each state of housing and colums for exogenous end-of-period assets grid
 
     # Intialize
     v_keep = np.zeros(shape) + np.nan
@@ -38,18 +38,33 @@ def solve_dc(sol, par, v_next, c_next, h_next):
 
     # Loop over housing states
     for n in range(2):
+        
+        # Loop over exogenous states (post decision states)
+        for a_i,a in enumerate(par.grid_a):
 
-        # Loop over asset grid
-        for m_i,m in enumerate(par.grid_m):
+            #Next periods assets and consumption
+            m_plus = (1+par.r)*a + par.y1
 
-            # High and low bounds
-            c_low =  1e-4 #np.fmin(m/2,1e-6)
-            c_high = m
+            # Interpolate next periods consumption - can this be combined?
+            c_plus_1 = tools.interp_linear_1d(m_next[0,:], c_next[0,:], m_plus) # State 1
+            c_plus_2 = tools.interp_linear_1d(m_next[1,:], c_next[1,:], m_plus) # State 2
 
-            # Call optimizer
-            obj_fun = lambda arg : - obj_keep(arg, n, m, v_next[n,:], par)
-            res = optimize.minimize_scalar(obj_fun, bounds = [c_low,c_high], method = 'bounded')
+            #Combine into a vector. Rows indicate income state, columns indicate asset state
+            c_plus = np.vstack((c_plus_1, c_plus_2))
+
+            # Marginal utility
+            marg_u_plus = util.marg_u(c_plus,par)
+            av_marg_u_plus = np.sum(par.P*marg_u_plus, axis = 1) # Dot product by row (axis = 1)
+
+            # Add optimal consumption and endogenous state
+            sol.c[:,a_i+1] = util.inv_marg_u((1+par.r)*par.beta*av_marg_u_plus,par)
+            sol.m[:,a_i+1] = a + sol.c[:,a_i+1]
+            sol.v = util.u(sol.c,par)
+
             
+            ######### add keeper problem somehow 
+        
+   
             # Unpack solution
             v_keep[n,m_i] = -res.fun
             c_keep[n,m_i] = res.x
