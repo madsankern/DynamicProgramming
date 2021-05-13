@@ -64,8 +64,7 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
 
             
             ######### add upper envelope
-        
-   
+            
 
     # b. Solve the adjuster problem
 
@@ -116,8 +115,48 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
                 sol.v[n,m_i] = v_adj[n,m_i]
                 sol.c[n,m_i] = c_adj[n,m_i]
                 sol.h[n,m_i] = 1 - n
+                
+
+    ## d. Upper envelope ##
     
+    # raw c, m and v
+#    c_raw = 
+#    m_raw = 
+#    v_raw = 
+    
+    # This is all choices of c and associated value where the necessary condition of the euler is true.
+    # In the upper envelope algorithm below, all non optimal choices are removed.
+
+    # Reorderining making G_m strictly increasing 
+#    m = sorted(m_raw)  # alternatively, choose a common grid exogeneously. This, however, creates many points around the kink
+#    I = m_raw
+#    c = [x for _,x in sorted(zip(I,c_raw))]  #Check these
+#    v = [x for _,x in sorted(zip(I,v_raw))]
+
+    # Loop through the endogenous grid
+#    for i in range(np.size(m_raw)-2): # Why minus 2?
+#        m_low = m_raw[i]
+#        m_high = m_raw[i+1]
+#        c_slope = (c_raw[i+1]-c_raw[i])/(m_high-m_low)
+
+        # Loop through the common grid
+#        for j in range(len(m)):
+
+#            if  m[j]>=m_low and m[j]<=m_high:
+
+#                c_guess = c_raw[i] + c_slope*(m[j]-m_low)
+#                v_guess = value_of_choice(m[j],c_guess,z_plus,t,sol,par)
+                    
+                # Update
+#                if v_guess >v[j]:
+#                    v[j]=v_guess
+#                    c[j]=c_guess
+
+#    return m,c,v
+
     return sol
+    
+    
 
 
 ######################
