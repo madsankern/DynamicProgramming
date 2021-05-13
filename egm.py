@@ -25,7 +25,7 @@ def obj_keep(arg, n, m, v_next, par):
     return value
 
 # Solution algorithm
-def solve_dc(sol, par, v_next, c_next, h_next):
+def solve_dc(sol, par, v_next, c_next, h_next, m_next):
 
     # a. Solve the keeper problem
 
@@ -45,30 +45,27 @@ def solve_dc(sol, par, v_next, c_next, h_next):
             #Next periods assets and consumption
             m_plus = (1+par.r)*a + par.y1
 
-            # Interpolate next periods consumption - can this be combined?
-            c_plus_1 = tools.interp_linear_1d(m_next[0,:], c_next[0,:], m_plus) # State 1
-            c_plus_2 = tools.interp_linear_1d(m_next[1,:], c_next[1,:], m_plus) # State 2
-
-            #Combine into a vector. Rows indicate income state, columns indicate asset state
-            c_plus = np.vstack((c_plus_1, c_plus_2))
-
+            # Interpolate next periods consumption 
+            c_plus = tools.interp_linear_1d(m_next[0,:], c_next[0,:], m_plus) 
+            
             # Marginal utility
             marg_u_plus = util.marg_u(c_plus,par)
             av_marg_u_plus = np.sum(par.P*marg_u_plus, axis = 1) # Dot product by row (axis = 1)
 
-            # Add optimal consumption and endogenous state
-            sol.c[:,a_i+1] = util.inv_marg_u((1+par.r)*par.beta*av_marg_u_plus,par)
-            sol.m[:,a_i+1] = a + sol.c[:,a_i+1]
-            sol.v = util.u(sol.c,par)
+            # Add optimal consumption and endogenous state using Euler equation
+            
+            #sol.c[:,a_i+1] = util.inv_marg_u((1+par.r)*par.beta*av_marg_u_plus,par)
+            #sol.m[:,a_i+1] = a + sol.c[:,a_i+1]
+            #sol.v = util.u(sol.c,par)
+            
+            c_keep[n,m_i] = util.inv_marg_u((1+par.r)*par.beta*av_marg_u_plus,par)
+            v_keep[n,m_i] = util.u_h(c_keep[n,m_i],n,par) 
+            h_keep[n,m_i] = n
 
             
-            ######### add keeper problem somehow 
+            ######### add upper envelope
         
    
-            # Unpack solution
-            v_keep[n,m_i] = -res.fun
-            c_keep[n,m_i] = res.x
-            h_keep[n,m_i] = n
 
     # b. Solve the adjuster problem
 

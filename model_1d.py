@@ -246,7 +246,7 @@ class model_1d():
         shape = (2,np.size(par.grid_a)) #  Row for each state of housing and columns for exogenous end-of-period asset grid 
 
         # Initialize
-        sol.m = np.zeros(shape) + np.nan
+        sol.m = np.tile(np.linspace(par.a_min,par.a_max,par.Na+1), shape)
         sol.c = np.zeros(shape) + np.nan
         sol.h = np.zeros(shape) + np.nan
         sol.v = np.zeros(shape) + np.nan
@@ -261,12 +261,13 @@ class model_1d():
         while (sol.delta >= par.tol_egm and sol.it < par.max_iter):
 
             # Continuation value
+            m_next = sol.m.copy()
             c_next = sol.c.copy()
             h_next = sol.h.copy()            
             v_next = sol.v.copy()
 
             # Solve the keeper problem
-            sol = egm.solve_dc(sol, par, v_next, c_next, h_next)
+            sol = egm.solve_dc(sol, par, v_next, c_next, h_next, m_next)
 
             sol.it += 1
             
