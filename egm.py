@@ -40,13 +40,13 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
     for n in range(2):
         
         # Loop over exogenous states (post decision states)
-        for a_i,a in enumerate(par.grid_a):
+        for m_i,a in enumerate(par.grid_a):
 
             #Next periods assets and consumption
             m_plus = (1+par.r)*a + par.y1
 
             # Interpolate next periods consumption 
-            c_plus = tools.interp_linear_1d(m_next[n,:], c_next[n,:], m_plus) 
+            c_plus = tools.interp_linear_1d_scalar(m_next[n,:], c_next[n,:], m_plus) 
             
             # Marginal utility
             marg_u_plus = util.marg_u(c_plus,par)
@@ -62,9 +62,6 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
             v_keep[n,m_i] = util.u_h(c_keep[n,m_i],n,par) 
             h_keep[n,m_i] = n
 
-            
-            ######### add upper envelope
-            
 
     # b. Solve the adjuster problem
 
@@ -119,10 +116,10 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
 
     ## d. Upper envelope ##
     
-    # raw c, m and v
-#    c_raw = 
-#    m_raw = 
-#    v_raw = 
+    # raw c, m and v 
+#    c_raw = sol.c
+#    m_raw = c_raw + par.grid_a
+#    v_raw = sol.v
     
     # This is all choices of c and associated value where the necessary condition of the euler is true.
     # In the upper envelope algorithm below, all non optimal choices are removed.
