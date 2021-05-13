@@ -23,6 +23,7 @@ class model_1d():
         self.sol_nvfi = SimpleNamespace()
         self.sol_egm = SimpleNamespace()
         self.sol_fd = SimpleNamespace()
+        self.sol_negm = SimpleNamespace()
 
     ###########
     ## Setup ##
@@ -225,5 +226,46 @@ class model_1d():
 
             # Solve the keeper problem
             sol = vfi.solve_dc(sol, par, v_next, c_next, h_next)
+
+            sol.it += 1
+            
+################
+## Nested EGM ##
+################
+    
+    def solve_negm_dc(self):
+
+        # Solve my backwards induction. In the last period, solve by last_period.py. 
+        # Then solve backwards until covergence
+
+        # Initialize
+        par = self.par
+        sol = self.sol_negm
+
+        # Shape parameter
+        shape = (2,np.size(par.grid_m)) #  Row for each state of housing
+
+        # Initialize
+        sol.m = np.tile(np.linspace(par.a_min,par.a_max,par.Na+1), shape)
+        sol.c = np.zeros(shape) + np.nan
+        sol.h = np.zeros(shape) + np.nan
+        sol.v = np.zeros(shape) + np.nan
+
+        # Solve last period
+        last_period.solve(sol,par)
+
+        sol.it = 0 # Iteration counter
+        sol.delta = 1000.0 # Difference between iterations
+
+        # Iterate value function until convergence or break if no convergence
+        while (sol.delta >= par.tol_egm and sol.it < par.max_iter):
+
+            # Continuation value
+            c_next = sol.c.copy()
+            h_next = sol.h.copy()            
+            v_next = sol.v.copy()
+
+            # Solve the keeper problem
+            sol = egm.solve_dc(sol, par, v_next, c_next, h_next)
 
             sol.it += 1
