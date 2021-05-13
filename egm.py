@@ -46,7 +46,7 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
             m_plus = (1+par.r)*a + par.y1
 
             # Interpolate next periods consumption 
-            c_plus = tools.interp_linear_1d(m_next[0,:], c_next[0,:], m_plus) 
+            c_plus = tools.interp_linear_1d(m_next[n,:], c_next[n,:], m_plus) 
             
             # Marginal utility
             marg_u_plus = util.marg_u(c_plus,par)
