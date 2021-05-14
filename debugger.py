@@ -8,9 +8,9 @@ model = model_1d()
 model.setup()
 model.create_grids()
 
-# Solve using VFI
-model.solve_vfi_dc()
-sol = model.sol_nvfi
+# Solve using NEGM
+model.solve_negm_dc()
+sol = model.sol_negm
 par = model.par
 
 # Plot

@@ -102,7 +102,7 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
 
     # c. Solve the adjuster problem
 
-    # Intialize
+    # Initialize
     v_adj = np.zeros(shape) + np.nan
     c_adj = np.zeros(shape) + np.nan
     h_adj = np.zeros(shape) + np.nan
