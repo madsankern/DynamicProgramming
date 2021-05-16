@@ -2,11 +2,12 @@
 ## Finite Difference method ##
 ##############################
 
-# Imports
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import sparse
 from scipy.sparse.linalg import spsolve
+
+# Local modules
 import utility as util
 
 def solve(par,sol):
@@ -19,19 +20,19 @@ def solve(par,sol):
     # Dimension of transition matrix
     n = par.Nm * y_size 
 
-    # Initial guess on value function = Stay put (UPDATE)
+    # Initial guess - zero savings
     sol.v = util.u(np.tile(par.grid_a,(y_size,1))*par.r
                     + np.tile(y_vals,(par.Nm,1)).transpose(),par)/par.rho
 
-    # Skill transition matrix
+    # Initialize A matrix
     y_transition = sparse.kron(par.pi, sparse.eye(par.Nm), format = "csr")
-    # This yields a sparse matrix containing all the lambdas in the correct possition
-    # for 'A' defined in the paper 
+    # This yields a sparse matrix containing all the lambdas in the correct position
+    # for the A matrix
 
     # Initialize
     v_old = np.zeros((y_size, par.Nm))
     dv = np.zeros((y_size, par.Nm-1))
-    cf = np.zeros((y_size, par.Nm-1))
+    c_foc = np.zeros((y_size, par.Nm-1))
     c0 = np.zeros((y_size,par.Nm))
     ssf = np.zeros((y_size,par.Nm))
     ssb = np.zeros((y_size,par.Nm))
@@ -42,6 +43,7 @@ def solve(par,sol):
     sol.B = y_transition.copy()
     # AT = y_transition.copy()
 
+    # Intialize loop parameters
     sol.it = 0 # Iteration counter
     sol.delta = 1000.0 # Difference between iterations
     Delta = 1000 # Step size of each iteration - can be large due to implicit updating
@@ -50,21 +52,21 @@ def solve(par,sol):
     while (sol.delta >= par.tol_fd and sol.it < par.max_iter):
 
         dv = (sol.v[:,1:]-sol.v[:,:-1])/dm # Finite difference approx
-        cf = util.inv_marg_u(dv,par) # Optimal consumption given value function
+        c_foc = util.inv_marg_u(dv,par) # Optimal consumption given value function
         c0 = np.tile(par.grid_m,(y_size,1))*par.r \
-                        + np.tile(y_vals,(par.Nm,1)).transpose() # Instantaneous savings given cf
+                        + np.tile(y_vals,(par.Nm,1)).transpose() # Income
 
         # Savings decomposed into positive and negative components
-        ssf[:,:-1] = c0[:,:-1] - cf # Backward imputation
-        ssb[:,1:] = c0[:,1:] - cf # Forward imputation
+        ssf[:,:-1] = c0[:,:-1] - c_foc # Backward imputation
+        ssb[:,1:] = c0[:,1:] - c_foc # Forward imputation
 
         # Note that the boundary conditions are handled implicitly as ssf will be zero at m_max and ssb at m_min 
         is_forward = ssf > 0
         is_backward = ssb < 0
 
         # Update savings based on forward or backward difference based on direction of drift
-        c0[:,:-1] += (cf - c0[:,:-1])*is_forward[:,:-1]
-        c0[:,1:] += (cf - c0[:,1:])*is_backward[:,1:]
+        c0[:,:-1] += (c_foc - c0[:,:-1])*is_forward[:,:-1]
+        c0[:,1:] += (c_foc - c0[:,1:])*is_backward[:,1:]
             
         # UNCOMMENT FOR DEBUGGING
         #plt.plot(self.par.grid_m, self.c0.transpose())#
@@ -94,7 +96,7 @@ def solve(par,sol):
         sol.it += 1
 
     # Unpack solution - Add what is needed here
-    sol.c = cf
+    sol.c = c_foc
     sol.a = par.grid_a
     sol.dv = dv
 
