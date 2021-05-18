@@ -46,11 +46,11 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
             m_plus = (1+par.r)*a + par.y1
 
             # Interpolate next periods consumption 
-            c_plus = tools.interp_linear_1d(m_next[n,:], c_next[n,:], m_plus) 
+            c_plus = tools.interp_linear_1d_scalar(m_next[n,:], c_next[n,:], m_plus) 
             
             # Marginal utility
             marg_u_plus = util.marg_u(c_plus,par)
-            av_marg_u_plus = np.sum(par.P*marg_u_plus, axis = 1) # Dot product by row (axis = 1) #### no average
+            #av_marg_u_plus = np.sum(par.P*marg_u_plus, axis = 1) # Dot product by row (axis = 1) #### no average
 
             # Add optimal consumption and endogenous state using Euler equation
             
@@ -58,7 +58,7 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
             #sol.m[:,a_i+1] = a + sol.c[:,a_i+1]
             #sol.v = util.u(sol.c,par)
             
-            c_keep[n,m_i] = util.inv_marg_u((1+par.r)*par.beta*av_marg_u_plus,par) #### no average
+            c_keep[n,m_i] = util.inv_marg_u((1+par.r)*par.beta*marg_u_plus,par) #### no average
             v_keep[n,m_i] = util.u_h(c_keep[n,m_i],n,par) 
             h_keep[n,m_i] = n
 
@@ -66,37 +66,37 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
     ## b. Upper envelope ##
     
     # raw c, m and v 
-#    c_raw = sol.c # c_keep
-#    m_raw = c_raw + par.grid_a 
-#    v_raw = sol.v # v_keep
+    c_raw = sol.c # c_keep
+    m_raw = c_raw + par.grid_a 
+    v_raw = sol.v # v_keep
     
     # This is all choices of c and associated value where the necessary condition of the euler is true.
     # In the upper envelope algorithm below, all non optimal choices are removed.
 
     # Reorderining making G_m strictly increasing 
-#    m = sorted(m_raw)  # alternatively, choose a common grid exogeneously. This, however, creates many points around the kink
-#    I = m_raw
-#    c = [x for _,x in sorted(zip(I,c_raw))]  #Check these
-#    v = [x for _,x in sorted(zip(I,v_raw))]
+    m = sorted(m_raw)  # alternatively, choose a common grid exogeneously. This, however, creates many points around the kink
+    I = m_raw
+    c = [x for _,x in sorted(zip(I,c_raw))]  #Check these
+    v = [x for _,x in sorted(zip(I,v_raw))]
 
     # Loop through the endogenous grid
-#    for i in range(np.size(m_raw)-2): # Why minus 2?
-#        m_low = m_raw[i]
-#        m_high = m_raw[i+1]
-#        c_slope = (c_raw[i+1]-c_raw[i])/(m_high-m_low)
+    for i in range(np.size(m_raw)-2): # Why minus 2?
+        m_low = m_raw[i]
+        m_high = m_raw[i+1]
+        c_slope = (c_raw[i+1]-c_raw[i])/(m_high-m_low)
 
         # Loop through the common grid
-#        for j in range(len(m)):
+        for j in range(len(m)):
 
-#            if  m[j]>=m_low and m[j]<=m_high:
+            if  m[j]>=m_low and m[j]<=m_high:
 
-#                c_guess = c_raw[i] + c_slope*(m[j]-m_low)
-#                v_guess = value_of_choice(m[j],c_guess,z_plus,t,sol,par) # value_of_choice should be changed to object_keep
+                c_guess = c_raw[i] + c_slope*(m[j]-m_low)
+                v_guess = value_of_choice(m[j],c_guess,z_plus,t,sol,par) # value_of_choice should be changed to object_keep
                     
                 # Update
-#                if v_guess >v[j]:
-#                    v[j]=v_guess
-#                    c[j]=c_guess
+                if v_guess >v[j]:
+                    v[j]=v_guess
+                    c[j]=c_guess
 
 #    return m,c,v
 
