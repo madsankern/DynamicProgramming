@@ -8,7 +8,7 @@ import utility as util
 
 
 # Objective function for the keeper
-def obj_keep(arg, n, m, v_next, par):
+def obj_keep(arg, n, m, v_next, par, m_next): # I have added m_next to the interpolation since it changes throughout iterations
 
     # Unpack
     c = arg
@@ -17,7 +17,7 @@ def obj_keep(arg, n, m, v_next, par):
     m_plus = (1+par.r)*(m - c) + par.y1
 
     # Continuation value
-    v_plus = tools.interp_linear_1d_scalar(par.grid_m, v_next, m_plus)
+    v_plus = tools.interp_linear_1d_scalar(m_next, v_next, m_plus)
 
     # Value of choice
     value = util.u_h(c,n,par) + par.beta*v_plus
@@ -63,7 +63,7 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
             h_keep[n,m_i] = n
 
             
-    ## b. Upper envelope ##
+    ## b. Upper envelope ## ... do we need to include 'h' in the upper envelope algorithm? 
     
     # raw c, m and v for each housing state (can probably be written into a loop or vectorized)
     c_raw_0 = c_keep[0]
@@ -99,7 +99,7 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
 
                 c_guess_0 = c_raw_0[i] + c_slope_0*(m_0[j]-m_low_0)
                 # v_guess_0 = value_of_choice(m[j],c_guess,z_plus,t,sol,par) # value_of_choice should be changed to object_keep
-                v_guess_0 = obj_keep(c_guess_0, 0, m_0[j], v_next, par) # check v_next
+                v_guess_0 = obj_keep(c_guess_0, 0, m_0[j], v_next[0], par, m_next[0]) # check v_next
 
                 # Update
                 if v_guess_0 >v_0[j]:
@@ -127,7 +127,7 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
 
                 c_guess_1 = c_raw_1[i] + c_slope_1*(m_1[j]-m_low_1)
                 # v_guess_0 = value_of_choice(m[j],c_guess,z_plus,t,sol,par) # value_of_choice should be changed to object_keep
-                v_guess_1 = obj_keep(c_guess_1, 1, m[j], v_next, par) # check v_next
+                v_guess_1 = obj_keep(c_guess_1, 1, m_1[j], v_next[1], par, m_next[1]) # check v_next
 
                 # Update
                 if v_guess_1 >v_1[j]:
@@ -136,6 +136,16 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
 
 #    return m,c,v
 
+    c = np.zeros(shape) + np.nan # we can probably just use c_keep and v_keep from earlier instead of creating new containers
+    c[0] = c_0
+    c[1] = c_1
+    v = np.zeros(shape) + np.nan
+    v[0] = v_0
+    v[1] = v_1
+    m_grid = np.zeros(shape) + np.nan
+    m_grid[0] = m_0
+    m_grid[1] = m_1
+    
     # c. Solve the adjuster problem
 
     # Initialize
@@ -150,7 +160,7 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
         h = 1 - n
 
         # Loop over asset grid
-        for m_i,m in enumerate(par.grid_m):
+        for m_i,m in enumerate(m_grid[n]): # endogenous grid or par.grid_m?
 
             # If adjustment is not possible
             if n == 0 and m < par.ph :
@@ -164,27 +174,29 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
                 x = m - par.ph*(h - n)
 
                 # Value of choice
-                v_adj[n,m_i] = tools.interp_linear_1d_scalar(par.grid_m, v_keep[h,:], x)
-                c_adj[n,m_i] = tools.interp_linear_1d_scalar(par.grid_m, c_keep[h,:], x)
+                v_adj[n,m_i] = tools.interp_linear_1d_scalar(m_grid[n], v[h,:], x) # endogenous grid or par.grid_m?
+                c_adj[n,m_i] = tools.interp_linear_1d_scalar(m_grid[n], c[h,:], x) # endogenous grid or par.grid_m?
                 h_adj[n,m_i] = h
 
     # d. Combine solutions
 
     # Loop over asset grid again
     for n in range(2):
-        for m_i,m in enumerate(par.grid_m):
+        for m_i,m in enumerate(m_grid[n]): # endogenous grid or par.grid_m?
 
             # If keeping is optimal
-            if v_keep[n,m_i] > v_adj[n,m_i]:
-                sol.v[n,m_i] = v_keep[n,m_i]
-                sol.c[n,m_i] = c_keep[n,m_i]
+            if v[n,m_i] > v_adj[n,m_i]:
+                sol.v[n,m_i] = v[n,m_i]
+                sol.c[n,m_i] = c[n,m_i]
                 sol.h[n,m_i] = n
+                sol.m[n,m_i] = m_grid[n,m_i] # added
 
             # If ajusting is optimal
             else:
                 sol.v[n,m_i] = v_adj[n,m_i]
                 sol.c[n,m_i] = c_adj[n,m_i]
                 sol.h[n,m_i] = 1 - n
+                sol.m[n,m_i] = m_grid[n,m_i] # added
                 
 
 
