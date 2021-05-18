@@ -65,38 +65,74 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
             
     ## b. Upper envelope ##
     
-    # raw c, m and v 
-    c_raw = sol.c # c_keep
-    m_raw = c_raw + par.grid_a 
-    v_raw = sol.v # v_keep
+    # raw c, m and v for each housing state (can probably be written into a loop or vectorized)
+    c_raw_0 = c_keep[0]
+    c_raw_1 = c_keep[1]
+    m_raw   = c_keep + np.transpose(par.grid_a) 
+    m_raw_0 = m_raw[0]
+    m_raw_1 = m_raw[1]
+    v_raw_0 = v_keep[0]
+    v_raw_1 = v_keep[1]
     
+
     # This is all choices of c and associated value where the necessary condition of the euler is true.
     # In the upper envelope algorithm below, all non optimal choices are removed.
 
+    ### first for housing state == 0 ###
+
     # Reorderining making G_m strictly increasing 
-    m = sorted(m_raw)  # alternatively, choose a common grid exogeneously. This, however, creates many points around the kink
-    I = m_raw
-    c = [x for _,x in sorted(zip(I,c_raw))]  # Here Thomas basically merges/zips the raw grids together, so that the c's and v's are associated with the correct m's
-    v = [x for _,x in sorted(zip(I,v_raw))]
+    m_0 = sorted(m_raw_0)  # alternatively, choose a common grid exogeneously. This, however, creates many points around the kink
+    I_0 = m_raw_0
+    c_0 = [x for _,x in sorted(zip(I_0,c_raw_0))]  # Here Thomas basically merges/zips the raw grids together, so that the c's and v's are associated with the correct m's
+    v_0 = [x for _,x in sorted(zip(I_0,v_raw_0))]
 
     # Loop through the endogenous grid
-    for i in range(np.size(m_raw)-2): # Why minus 2?
-        m_low = m_raw[i]
-        m_high = m_raw[i+1]
-        c_slope = (c_raw[i+1]-c_raw[i])/(m_high-m_low)
+    for i in range(np.size(m_raw_0)-2): # Why minus 2? 
+        m_low_0 = m_raw_0[i]
+        m_high_0 = m_raw_0[i+1]
+        c_slope_0 = (c_raw_0[i+1]-c_raw_0[i])/(m_high_0-m_low_0)
 
         # Loop through the common grid
-        for j in range(len(m)):
+        for j in range(len(m_0)):
 
-            if  m[j]>=m_low and m[j]<=m_high:
+            if  m_0[j]>=m_low_0 and m_0[j]<=m_high_0:
 
-                c_guess = c_raw[i] + c_slope*(m[j]-m_low)
-                v_guess = value_of_choice(m[j],c_guess,z_plus,t,sol,par) # value_of_choice should be changed to object_keep
-                    
+                c_guess_0 = c_raw_0[i] + c_slope_0*(m_0[j]-m_low_0)
+                # v_guess_0 = value_of_choice(m[j],c_guess,z_plus,t,sol,par) # value_of_choice should be changed to object_keep
+                v_guess_0 = obj_keep(c_guess_0, 0, m_0[j], v_next, par) # check v_next
+
                 # Update
-                if v_guess >v[j]:
-                    v[j]=v_guess
-                    c[j]=c_guess
+                if v_guess_0 >v_0[j]:
+                    v_0[j]=v_guess_0
+                    c_0[j]=c_guess_0
+
+    ### then for housing state == 1 ###
+
+    # Reorderining making G_m strictly increasing 
+    m_1 = sorted(m_raw_1)  # alternatively, choose a common grid exogeneously. This, however, creates many points around the kink
+    I_1 = m_raw_1
+    c_1 = [x for _,x in sorted(zip(I_1,c_raw_1))]  # Here Thomas basically merges/zips the raw grids together, so that the c's and v's are associated with the correct m's
+    v_1 = [x for _,x in sorted(zip(I_1,v_raw_1))]
+
+    # Loop through the endogenous grid
+    for i in range(np.size(m_raw_1)-2): # Why minus 2? 
+        m_low_1 = m_raw_1[i]
+        m_high_1 = m_raw_1[i+1]
+        c_slope_1 = (c_raw_1[i+1]-c_raw_1[i])/(m_high_1-m_low_1)
+
+        # Loop through the common grid
+        for j in range(len(m_1)):
+
+            if  m_1[j]>=m_low_1 and m_1[j]<=m_high_1:
+
+                c_guess_1 = c_raw_1[i] + c_slope_1*(m_1[j]-m_low_1)
+                # v_guess_0 = value_of_choice(m[j],c_guess,z_plus,t,sol,par) # value_of_choice should be changed to object_keep
+                v_guess_1 = obj_keep(c_guess_1, 1, m[j], v_next, par) # check v_next
+
+                # Update
+                if v_guess_1 >v_1[j]:
+                    v_1[j]=v_guess_1
+                    c_1[j]=c_guess_1                    
 
 #    return m,c,v
 
