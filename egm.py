@@ -136,12 +136,12 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
 
 #    return m,c,v
 
-    c = np.zeros(shape) + np.nan # we can probably just use c_keep and v_keep from earlier instead of creating new containers
-    c[0] = c_0
-    c[1] = c_1
-    v = np.zeros(shape) + np.nan
-    v[0] = v_0
-    v[1] = v_1
+    #c = np.zeros(shape) + np.nan (old)
+    c_keep[0] = c_0
+    c_keep[1] = c_1
+    #v = np.zeros(shape) + np.nan (old)
+    v_keep[0] = v_0
+    v_keep[1] = v_1
     m_grid = np.zeros(shape) + np.nan
     m_grid[0] = m_0
     m_grid[1] = m_1
@@ -174,8 +174,8 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
                 x = m - par.ph*(h - n)
 
                 # Value of choice
-                v_adj[n,m_i] = tools.interp_linear_1d_scalar(m_grid[n], v[h,:], x) # endogenous grid or par.grid_m?
-                c_adj[n,m_i] = tools.interp_linear_1d_scalar(m_grid[n], c[h,:], x) # endogenous grid or par.grid_m?
+                v_adj[n,m_i] = tools.interp_linear_1d_scalar(m_grid[n], v_keep[h,:], x) # endogenous grid or par.grid_m?
+                c_adj[n,m_i] = tools.interp_linear_1d_scalar(m_grid[n], c_keep[h,:], x) # endogenous grid or par.grid_m?
                 h_adj[n,m_i] = h
 
     # d. Combine solutions
@@ -185,13 +185,13 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
         for m_i,m in enumerate(m_grid[n]): # endogenous grid or par.grid_m?
 
             # If keeping is optimal
-            if v[n,m_i] > v_adj[n,m_i]:
-                sol.v[n,m_i] = v[n,m_i]
-                sol.c[n,m_i] = c[n,m_i]
+            if v_keep[n,m_i] > v_adj[n,m_i]:
+                sol.v[n,m_i] = v_keep[n,m_i]
+                sol.c[n,m_i] = c_keep[n,m_i]
                 sol.h[n,m_i] = n
                 sol.m[n,m_i] = m_grid[n,m_i] # added
 
-            # If ajusting is optimal
+            # If adjusting is optimal
             else:
                 sol.v[n,m_i] = v_adj[n,m_i]
                 sol.c[n,m_i] = c_adj[n,m_i]
