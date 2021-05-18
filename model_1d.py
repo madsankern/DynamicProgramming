@@ -246,7 +246,7 @@ class model_1d():
         shape = (2,np.size(par.grid_a)) #  Row for each state of housing and columns for exogenous end-of-period asset grid 
 
         # Initialize
-        sol.m = np.tile(np.linspace(par.a_min,par.a_max,par.Na+1), shape)
+        sol.m = np.tile(np.linspace(par.a_min,par.a_max,par.Na), (2,1))
         sol.c = np.zeros(shape) + np.nan
         sol.h = np.zeros(shape) + np.nan
         sol.v = np.zeros(shape) + np.nan
