@@ -76,7 +76,7 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
     # Reorderining making G_m strictly increasing 
     m = sorted(m_raw)  # alternatively, choose a common grid exogeneously. This, however, creates many points around the kink
     I = m_raw
-    c = [x for _,x in sorted(zip(I,c_raw))]  #Check these
+    c = [x for _,x in sorted(zip(I,c_raw))]  # Here Thomas basically merges/zips the raw grids together, so that the c's and v's are associated with the correct m's
     v = [x for _,x in sorted(zip(I,v_raw))]
 
     # Loop through the endogenous grid
