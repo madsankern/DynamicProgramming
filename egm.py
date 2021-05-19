@@ -137,7 +137,7 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
                     v_1[j]=v_guess_1
                     c_1[j]=c_guess_1                    
 
-    #return m,c,v
+    # return m,c,v
 
     #c = np.zeros(shape) + np.nan (old)
     c_keep[0] = c_0
@@ -149,12 +149,6 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
     m_grid[0] = m_0
     m_grid[1] = m_1
 
-    m_con_0 = np.linspace(0+1e-8,m_grid[0,0]-1e-8,par.N_bottom)
-    m_con_1 = np.linspace(0+1e-8,m_grid[1,0]-1e-8,par.N_bottom)
-    c_con_0 = m_con_0.copy()
-    c_con_1 = m_con_1.copy()
-    v_con_0 = obj_keep(c_con_0,0,m_con_0,v_next[0], par, m_next[0])
-    v_con_1 = obj_keep(c_con_1,1,m_con_1,v_next[1], par, m_next[1])
     
     # c. Solve the adjuster problem
 
@@ -208,6 +202,16 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
                 sol.h[n,a_i] = 1 - n
                 sol.m[n,a_i] = m_grid[n,a_i] # added
                 
+
+    
+    # add points at the constraints
+    m_con_0 = np.linspace(0+1e-8,m_grid[0,0]-1e-8,par.N_bottom)
+    m_con_1 = np.linspace(0+1e-8,m_grid[1,0]-1e-8,par.N_bottom)
+    c_con_0 = m_con_0.copy()
+    c_con_1 = m_con_1.copy()
+    v_con_0 = [obj_keep(c_con_0[i],0,m_con_0[i],v_next[0], par, m_next[0]) for i in range(par.N_bottom)]
+    v_con_1 = [obj_keep(c_con_1[i],1,m_con_1[i],v_next[1], par, m_next[1]) for i in range(par.N_bottom)]
+
 
 
     return sol

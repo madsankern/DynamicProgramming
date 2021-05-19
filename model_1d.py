@@ -271,15 +271,17 @@ class model_1d():
             # Solve the keeper problem
             sol = egm.solve_dc(sol, par, v_next, c_next, h_next, m_next)
 
-            # # Add points at the constraints (alternatively, look at exercise 1)
+            # # Add points at the constraints (alternatively, look at exercise 1) --> DONE INSIDE EGM.PY
             # m_con = np.linspace(0+1e-8,m[0]-1e-8,par.N_bottom)
             # c_con = m_con.copy()
             # v_con = value_of_choice(m_con,c_con,z_plus,t,sol,par)
 
-            # sol.m[t,z_plus] = np.append(m_con, m)
-            # sol.c[t,z_plus] = np.append(c_con, c)
-            # sol.v[t,z_plus] = np.append(v_con, v)
-
+            for n in range(2):
+                sol.m[n] = np.append(m_con_'n', m)
+                sol.c[n] = np.append(c_con_'n', c)
+                sol.h[n] = np.append(v_con_'n', v)
+                sol.v[n] = np.append(v_con_'n', v)
+                
             sol.it += 1
             
             
