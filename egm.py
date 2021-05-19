@@ -148,6 +148,13 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
     m_grid = np.zeros(shape) + np.nan
     m_grid[0] = m_0
     m_grid[1] = m_1
+
+    m_con_0 = np.linspace(0+1e-8,m_grid[0,0]-1e-8,par.N_bottom)
+    m_con_1 = np.linspace(0+1e-8,m_grid[1,0]-1e-8,par.N_bottom)
+    c_con_0 = m_con_0.copy()
+    c_con_1 = m_con_1.copy()
+    v_con_0 = obj_keep(c_con_0,0,m_con_0,v_next[0], par, m_next[0])
+    v_con_1 = obj_keep(c_con_1,1,m_con_1,v_next[1], par, m_next[1])
     
     # c. Solve the adjuster problem
 

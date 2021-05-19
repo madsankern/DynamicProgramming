@@ -59,7 +59,7 @@ class model_1d():
         par.ph = 3.0
 
         # Grid settings
-        par.Nm = 100
+        par.Nm = 110
         par.m_max = 10.0
         par.m_min = 1e-4
 
@@ -75,6 +75,8 @@ class model_1d():
         par.tol_vfi = 10e-4
         par.tol_egm = 10e-4
         par.tol_fd = 10e-4
+
+        par.N_bottom = 10 
 
     # Asset grids
     def create_grids(self):
@@ -243,10 +245,10 @@ class model_1d():
         sol = self.sol_negm
 
         # Shape parameter
-        shape = (2,np.size(par.grid_a)) #  Row for each state of housing and columns for exogenous end-of-period asset grid 
+        shape = (2,np.size(par.grid_a) + par.N_bottom) #  Row for each state of housing and columns for exogenous end-of-period asset grid 
 
         # Initialize
-        sol.m = np.tile(np.linspace(par.a_min,par.a_max,par.Na), (2,1))
+        sol.m = np.tile(np.linspace(par.a_min,par.a_max,par.Na + par.N_bottom), (2,1))
         sol.c = np.zeros(shape) + np.nan
         sol.h = np.zeros(shape) + np.nan
         sol.v = np.zeros(shape) + np.nan
@@ -268,6 +270,15 @@ class model_1d():
 
             # Solve the keeper problem
             sol = egm.solve_dc(sol, par, v_next, c_next, h_next, m_next)
+
+            # # Add points at the constraints (alternatively, look at exercise 1)
+            # m_con = np.linspace(0+1e-8,m[0]-1e-8,par.N_bottom)
+            # c_con = m_con.copy()
+            # v_con = value_of_choice(m_con,c_con,z_plus,t,sol,par)
+
+            # sol.m[t,z_plus] = np.append(m_con, m)
+            # sol.c[t,z_plus] = np.append(c_con, c)
+            # sol.v[t,z_plus] = np.append(v_con, v)
 
             sol.it += 1
             
