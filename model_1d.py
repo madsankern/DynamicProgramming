@@ -10,7 +10,7 @@ import fd
 import utility as util
 # import scipy.optimize as optimize
 import last_period
-
+import last_period_negm
 
 class model_1d():
 
@@ -42,7 +42,7 @@ class model_1d():
         par.eta = 0.5
         
         par.r = 0.01
-        par.y1 = 1.0
+        par.y1 = 1.5
         par.y2 = 2.0
         par.y = np.array([par.y1, par.y2])
         
@@ -59,7 +59,7 @@ class model_1d():
         par.ph = 3.0
 
         # Grid settings
-        par.Nm = 110
+        par.Nm = 100
         par.m_max = 10.0
         par.m_min = 1e-4
 
@@ -207,7 +207,7 @@ class model_1d():
         shape = (2,np.size(par.grid_m)) #  Row for each state of housing
 
         # Initialize
-        sol.m = np.tile(np.linspace(par.a_min,par.a_max,par.Na+1), shape)
+        sol.m = np.tile(np.linspace(par.a_min,par.a_max,par.Na), (2,1)) # should it be 'par.Na+1' and should it be 'shape' instead of (2,1)?
         sol.c = np.zeros(shape) + np.nan
         sol.h = np.zeros(shape) + np.nan
         sol.v = np.zeros(shape) + np.nan
@@ -254,7 +254,7 @@ class model_1d():
         sol.v = np.zeros(shape) + np.nan
 
         # Solve last period
-        last_period.solve(sol,par)
+        last_period_negm.solve(sol,par)
 
         sol.it = 0 # Iteration counter
         sol.delta = 1000.0 # Difference between iterations
@@ -276,11 +276,11 @@ class model_1d():
             # c_con = m_con.copy()
             # v_con = value_of_choice(m_con,c_con,z_plus,t,sol,par)
 
-            for n in range(2):
-                sol.m[n] = np.append(m_con_'n', m)
-                sol.c[n] = np.append(c_con_'n', c)
-                sol.h[n] = np.append(v_con_'n', v)
-                sol.v[n] = np.append(v_con_'n', v)
+            # for n in range(2):
+            #     sol.m[n] = np.append(m_con_'n', m)
+            #     sol.c[n] = np.append(c_con_'n', c)
+            #     sol.h[n] = np.append(v_con_'n', v)
+            #     sol.v[n] = np.append(v_con_'n', v)
                 
             sol.it += 1
             

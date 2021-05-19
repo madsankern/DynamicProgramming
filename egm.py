@@ -46,7 +46,7 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
             m_plus = (1+par.r)*a + par.y1
 
             # Interpolate next periods consumption 
-            c_plus = tools.interp_linear_1d_scalar(m_next[n,:], c_next[n,:], m_plus) 
+            c_plus = tools.interp_linear_1d_scalar(m_next[n,par.N_bottom:], c_next[n,par.N_bottom:], m_plus) 
             
             # Marginal utility
             marg_u_plus = util.marg_u(c_plus,par)
@@ -103,7 +103,7 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
 
                 c_guess_0 = c_raw_0[i] + c_slope_0*(m_0[j]-m_low_0)
                     # v_guess_0 = value_of_choice(m[j],c_guess,z_plus,t,sol,par) # value_of_choice should be changed to object_keep
-                v_guess_0 = obj_keep(c_guess_0, 0, m_0[j], v_next[0], par, m_next[0]) # check v_next
+                v_guess_0 = obj_keep(c_guess_0, 0, m_0[j], v_next[0,par.N_bottom:], par, m_next[0,par.N_bottom:]) # check v_next
 
                     # Update
                 if v_guess_0 >v_0[j]:
@@ -130,7 +130,7 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
             if  m_1[j]>=m_low_1 and m_1[j]<=m_high_1:
 
                 c_guess_1 = c_raw_1[i] + c_slope_1*(m_1[j]-m_low_1)
-                v_guess_1 = obj_keep(c_guess_1, 1, m_1[j], v_next[1], par, m_next[1]) # check v_next
+                v_guess_1 = obj_keep(c_guess_1, 1, m_1[j], v_next[1,par.N_bottom:], par, m_next[1,par.N_bottom:]) # check v_next
 
                 # Update
                 if v_guess_1 >v_1[j]:
@@ -190,21 +190,21 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
 
             # If keeping is optimal
             if v_keep[n,a_i] > v_adj[n,a_i]:
-                sol.v[n,a_i] = v_keep[n,a_i]
-                sol.c[n,a_i] = c_keep[n,a_i]
-                sol.h[n,a_i] = n
-                sol.m[n,a_i] = m_grid[n,a_i] # added
+                sol.v[n,a_i+par.N_bottom] = v_keep[n,a_i]
+                sol.c[n,a_i+par.N_bottom] = c_keep[n,a_i]
+                sol.h[n,a_i+par.N_bottom] = n
+                sol.m[n,a_i+par.N_bottom] = m_grid[n,a_i] # added
 
             # If adjusting is optimal
             else:
-                sol.v[n,a_i] = v_adj[n,a_i]
-                sol.c[n,a_i] = c_adj[n,a_i]
-                sol.h[n,a_i] = 1 - n
-                sol.m[n,a_i] = m_grid[n,a_i] # added
+                sol.v[n,a_i+par.N_bottom] = v_adj[n,a_i]
+                sol.c[n,a_i+par.N_bottom] = c_adj[n,a_i]
+                sol.h[n,a_i+par.N_bottom] = 1 - n
+                sol.m[n,a_i+par.N_bottom] = m_grid[n,a_i] # added
                 
 
-    
-    # add points at the constraints
+    # add points at the constraints (can be looped or vectorized)
+
     m_con_0 = np.linspace(0+1e-8,m_grid[0,0]-1e-8,par.N_bottom)
     m_con_1 = np.linspace(0+1e-8,m_grid[1,0]-1e-8,par.N_bottom)
     c_con_0 = m_con_0.copy()
@@ -212,7 +212,15 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
     v_con_0 = [obj_keep(c_con_0[i],0,m_con_0[i],v_next[0], par, m_next[0]) for i in range(par.N_bottom)]
     v_con_1 = [obj_keep(c_con_1[i],1,m_con_1[i],v_next[1], par, m_next[1]) for i in range(par.N_bottom)]
 
-
+    for i in range(par.N_bottom):
+        sol.m[0,i] = m_con_0[i]
+        sol.m[1,i] = m_con_1[i]
+        sol.c[0,i] = c_con_0[i]
+        sol.c[1,i] = c_con_1[i]
+        sol.v[0,i] = v_con_0[i]
+        sol.v[1,i] = v_con_1[i]
+        sol.h[0,i] = sol.h[0,0] # equal to whatever the housing choice is at the beginning of the endogenous solution
+        sol.h[1,i] = sol.h[1,0]
 
     return sol
     
