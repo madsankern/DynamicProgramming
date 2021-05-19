@@ -40,7 +40,7 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
     for n in range(2):
         
         # Loop over exogenous states (post decision states)
-        for m_i,a in enumerate(par.grid_a):
+        for a_i,a in enumerate(par.grid_a):
 
             #Next periods assets and consumption
             m_plus = (1+par.r)*a + par.y1
@@ -58,22 +58,26 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
             #sol.m[:,a_i+1] = a + sol.c[:,a_i+1]
             #sol.v = util.u(sol.c,par)
             
-            c_keep[n,m_i] = util.inv_marg_u((1+par.r)*par.beta*marg_u_plus,par) #### no average
-            v_keep[n,m_i] = util.u_h(c_keep[n,m_i],n,par) 
-            h_keep[n,m_i] = n
+            c_keep[n,a_i] = util.inv_marg_u((1+par.r)*par.beta*marg_u_plus,par) #### no average
+            v_keep[n,a_i] = util.u_h(c_keep[n,a_i],n,par) 
+            h_keep[n,a_i] = n
 
             
+    # m_grid   = c_keep + par.grid_a # debugger only
+    # m_grid[0] = m_grid[0] # debugger only
+    # m_grid[1] = m_grid[1] # debugger only
+
     ## b. Upper envelope ## ... do we need to include 'h' in the upper envelope algorithm? 
     
-    # raw c, m and v for each housing state (can probably be written into a loop or vectorized)
+    ## raw c, m and v for each housing state (can probably be written into a loop or vectorized)
     c_raw_0 = c_keep[0]
     c_raw_1 = c_keep[1]
-    m_raw   = c_keep + np.transpose(par.grid_a) 
+    m_raw   = c_keep + par.grid_a 
     m_raw_0 = m_raw[0]
     m_raw_1 = m_raw[1]
     v_raw_0 = v_keep[0]
     v_raw_1 = v_keep[1]
-    
+
 
     # This is all choices of c and associated value where the necessary condition of the euler is true.
     # In the upper envelope algorithm below, all non optimal choices are removed.
@@ -98,10 +102,10 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
             if  m_0[j]>=m_low_0 and m_0[j]<=m_high_0:
 
                 c_guess_0 = c_raw_0[i] + c_slope_0*(m_0[j]-m_low_0)
-                # v_guess_0 = value_of_choice(m[j],c_guess,z_plus,t,sol,par) # value_of_choice should be changed to object_keep
+                    # v_guess_0 = value_of_choice(m[j],c_guess,z_plus,t,sol,par) # value_of_choice should be changed to object_keep
                 v_guess_0 = obj_keep(c_guess_0, 0, m_0[j], v_next[0], par, m_next[0]) # check v_next
 
-                # Update
+                    # Update
                 if v_guess_0 >v_0[j]:
                     v_0[j]=v_guess_0
                     c_0[j]=c_guess_0
@@ -126,7 +130,6 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
             if  m_1[j]>=m_low_1 and m_1[j]<=m_high_1:
 
                 c_guess_1 = c_raw_1[i] + c_slope_1*(m_1[j]-m_low_1)
-                # v_guess_0 = value_of_choice(m[j],c_guess,z_plus,t,sol,par) # value_of_choice should be changed to object_keep
                 v_guess_1 = obj_keep(c_guess_1, 1, m_1[j], v_next[1], par, m_next[1]) # check v_next
 
                 # Update
@@ -134,7 +137,7 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
                     v_1[j]=v_guess_1
                     c_1[j]=c_guess_1                    
 
-#    return m,c,v
+    #return m,c,v
 
     #c = np.zeros(shape) + np.nan (old)
     c_keep[0] = c_0
@@ -160,13 +163,13 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
         h = 1 - n
 
         # Loop over asset grid
-        for m_i,m in enumerate(m_grid[n]): # endogenous grid or par.grid_m?
+        for a_i,m in enumerate(m_grid[n]): # endogenous grid or par.grid_m?
 
             # If adjustment is not possible
             if n == 0 and m < par.ph :
-                v_adj[n,m_i] = -np.inf
-                c_adj[n,m_i] = 0
-                h_adj[n,m_i] = np.nan
+                v_adj[n,a_i] = -np.inf
+                c_adj[n,a_i] = 0
+                h_adj[n,a_i] = np.nan
 
             else:
 
@@ -174,29 +177,29 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
                 x = m - par.ph*(h - n)
 
                 # Value of choice
-                v_adj[n,m_i] = tools.interp_linear_1d_scalar(m_grid[n], v_keep[h,:], x) # endogenous grid or par.grid_m?
-                c_adj[n,m_i] = tools.interp_linear_1d_scalar(m_grid[n], c_keep[h,:], x) # endogenous grid or par.grid_m?
-                h_adj[n,m_i] = h
+                v_adj[n,a_i] = tools.interp_linear_1d_scalar(m_grid[n], v_keep[h,:], x) # endogenous grid or par.grid_m?
+                c_adj[n,a_i] = tools.interp_linear_1d_scalar(m_grid[n], c_keep[h,:], x) # endogenous grid or par.grid_m?
+                h_adj[n,a_i] = h
 
     # d. Combine solutions
 
     # Loop over asset grid again
     for n in range(2):
-        for m_i,m in enumerate(m_grid[n]): # endogenous grid or par.grid_m?
+        for a_i,m in enumerate(m_grid[n]): # endogenous grid or par.grid_m?
 
             # If keeping is optimal
-            if v_keep[n,m_i] > v_adj[n,m_i]:
-                sol.v[n,m_i] = v_keep[n,m_i]
-                sol.c[n,m_i] = c_keep[n,m_i]
-                sol.h[n,m_i] = n
-                sol.m[n,m_i] = m_grid[n,m_i] # added
+            if v_keep[n,a_i] > v_adj[n,a_i]:
+                sol.v[n,a_i] = v_keep[n,a_i]
+                sol.c[n,a_i] = c_keep[n,a_i]
+                sol.h[n,a_i] = n
+                sol.m[n,a_i] = m_grid[n,a_i] # added
 
             # If adjusting is optimal
             else:
-                sol.v[n,m_i] = v_adj[n,m_i]
-                sol.c[n,m_i] = c_adj[n,m_i]
-                sol.h[n,m_i] = 1 - n
-                sol.m[n,m_i] = m_grid[n,m_i] # added
+                sol.v[n,a_i] = v_adj[n,a_i]
+                sol.c[n,a_i] = c_adj[n,a_i]
+                sol.h[n,a_i] = 1 - n
+                sol.m[n,a_i] = m_grid[n,a_i] # added
                 
 
 

@@ -71,7 +71,7 @@ class model_1d():
         par.x_max = par.m_max + par.ph # add price of selling house to the top of the x grid (grid when selling/buying house)
         par.x_min = 1e-4
         
-        par.max_iter = 50
+        par.max_iter = 5
         par.tol_vfi = 10e-4
         par.tol_egm = 10e-4
         par.tol_fd = 10e-4
@@ -259,7 +259,7 @@ class model_1d():
 
         # Iterate value function until convergence or break if no convergence
         while (sol.delta >= par.tol_egm and sol.it < par.max_iter):
-
+            
             # Continuation value
             m_next = sol.m.copy()
             c_next = sol.c.copy()
