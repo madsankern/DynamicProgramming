@@ -77,6 +77,7 @@ def solve(par):
             sol.m[t,z_plus] = np.append(m_con, m)
             sol.c[t,z_plus] = np.append(c_con, c)
             sol.v[t,z_plus] = np.append(v_con, v)
+            
     return sol
 
 
