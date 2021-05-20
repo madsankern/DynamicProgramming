@@ -127,9 +127,17 @@ def value_of_choice(m,c,h,t,sol,par):
     a = np.repeat(m-c,(par.xi.size))
     m_plus = par.R * a + par.W
 
-    # Next-period value
-    v_plus0 = tools.interp_linear_1d(sol.m[t+1,0,par.N_bottom:],sol.v[t+1,0,par.N_bottom:], m_plus)
-    v_plus1 = tools.interp_linear_1d(sol.m[t+1,1,par.N_bottom:],sol.v[t+1,1,par.N_bottom:], m_plus)
+ 
+    # Note: Siden vi laver upper-envelope på både house og no-house, så skal vi indføre et if-statement.
+    # Next-period value if you choose no-house today
+    if h==0:
+        v_plus0 = tools.interp_linear_1d(sol.m[t+1,0,par.N_bottom:],sol.v[t+1,0,par.N_bottom:], m_plus) # No house
+        v_plus1 = tools.interp_linear_1d(sol.m[t+1,1,par.N_bottom:],sol.v[t+1,1,par.N_bottom:], m_plus-par.ph) # House
+    # Next-period value if you choose house today.    
+    else:
+        v_plus0 = tools.interp_linear_1d(sol.m[t+1,0,par.N_bottom:],sol.v[t+1,0,par.N_bottom:], m_plus+par.ph) # No house
+        v_plus1 = tools.interp_linear_1d(sol.m[t+1,1,par.N_bottom:],sol.v[t+1,1,par.N_bottom:], m_plus) # House    
+    
     V_plus, _ = logsum(v_plus0,v_plus1,par.sigma_eta) # Find the maximum of v0 and v1
 
     # This period value

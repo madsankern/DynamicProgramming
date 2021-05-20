@@ -23,7 +23,7 @@ class model_dc():
 
         par = self.par
 
-        par.T = 20
+        par.T = 10
 
         # Model parameters
         par.beta = 0.95
@@ -33,7 +33,7 @@ class model_dc():
         par.W = 1
         par.sigma_xi = 0.0
 
-        par.kappa = 1.0 # Housesing utility
+        par.kappa = 10.0 # Housesing utility
         par.ph = 1.5 # House price
         
         par.sigma_eta = 0.0 # No stochastic income
@@ -46,7 +46,6 @@ class model_dc():
         par.Na = 150  # nr of grid points for a
         par.N_bottom = 10 # Number of points at the bottom in the G2-EGM algorithm
         
-
     def create_grids(self):
 
         par = self.par
