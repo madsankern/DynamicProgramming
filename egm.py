@@ -57,10 +57,12 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
             #sol.c[:,a_i+1] = util.inv_marg_u((1+par.r)*par.beta*av_marg_u_plus,par)
             #sol.m[:,a_i+1] = a + sol.c[:,a_i+1]
             #sol.v = util.u(sol.c,par)
-            
+             
             c_keep[n,a_i] = util.inv_marg_u((1+par.r)*par.beta*marg_u_plus,par) #### no average
             v_keep[n,a_i] = util.u_h(c_keep[n,a_i],n,par) 
-            h_keep[n,a_i] = n
+            h_keep[n,a_i] = n 
+
+    ### UPPER ENVELOPE ###
 
     c_keep, v_keep, m_grid = upper_envelope(c_keep, v_keep, v_next, m_next, shape, par)
             
@@ -161,7 +163,6 @@ def upper_envelope(c_keep, v_keep, v_next, m_next, shape, par):
     m_raw_1 = m_raw[1]
     v_raw_0 = v_keep[0]
     v_raw_1 = v_keep[1]
-
 
     # This is all choices of c and associated value where the necessary condition of the euler is true.
     # In the upper envelope algorithm below, all non optimal choices are removed.
