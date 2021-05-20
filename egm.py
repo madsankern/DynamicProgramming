@@ -59,7 +59,7 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
             #sol.v = util.u(sol.c,par)
              
             c_keep[n,a_i] = util.inv_marg_u((1+par.r)*par.beta*marg_u_plus,par) #### no average
-            v_keep[n,a_i] = util.u_h(c_keep[n,a_i],n,par) 
+            v_keep[n,a_i] = obj_keep(c_keep[n,a_i], n, c_keep[n,a_i] + a, v_next[n, par.N_bottom:], par, m_next[n, par.N_bottom:]) # OLD: util.u_h(c_keep[n,a_i],n,par)
             h_keep[n,a_i] = n 
 
     ### UPPER ENVELOPE ###

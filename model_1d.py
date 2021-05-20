@@ -65,14 +65,14 @@ class model_1d():
         par.m_min = 1e-4
 
         par.Na = 100
-        par.a_min = 1e-4
-        par.a_max = par.m_max + 1.0 # Check this out later
+        par.a_min = par.m_min
+        par.a_max = par.m_max # Check this out later
 
         par.Nx = 100
         par.x_max = par.m_max + par.ph # add price of selling house to the top of the x grid (grid when selling/buying house)
         par.x_min = 1e-4
         
-        par.max_iter = 1
+        par.max_iter = 4
         par.tol_vfi = 10e-4
         par.tol_egm = 10e-4
         par.tol_fd = 10e-4
