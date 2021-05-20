@@ -3,7 +3,7 @@ import tools
 import utility as util
 
 #####################################
-## Nested EGM ##
+##            Nested EGM           ##
 #####################################
 
 
@@ -68,8 +68,7 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
     # m_grid[0] = m_grid[0] # debugger only
     # m_grid[1] = m_grid[1] # debugger only
 
-
-    # c. Solve the adjuster problem
+    # b. Solve the adjuster problem
 
     # Initialize
     v_adj = np.zeros(shape) + np.nan
@@ -106,7 +105,7 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
                 c_adj[n,a_i] = tools.interp_linear_1d_scalar(m_grid[n], c_keep[h,:], x) # endogenous grid or par.grid_m?
                 h_adj[n,a_i] = h
 
-    # d. Combine solutions
+    # c. Combine solutions
 
     # Loop over asset grid again
     for n in range(2):
@@ -233,6 +232,15 @@ def upper_envelope(c_keep, v_keep, v_next, m_next, shape, par):
     m_grid[1] = m_1
 
     return c_keep, v_keep, m_grid
+
+
+
+
+
+
+
+
+
 
 
 ######################
