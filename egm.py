@@ -62,94 +62,13 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
             v_keep[n,a_i] = util.u_h(c_keep[n,a_i],n,par) 
             h_keep[n,a_i] = n
 
+    c_keep, v_keep, m_grid = upper_envelope(c_keep, v_keep, v_next, m_next, shape, par)
             
     # m_grid   = c_keep + par.grid_a # debugger only
     # m_grid[0] = m_grid[0] # debugger only
     # m_grid[1] = m_grid[1] # debugger only
 
-    ## b. Upper envelope ## ... do we need to include 'h' in the upper envelope algorithm? 
-    
-    ## raw c, m and v for each housing state (can probably be written into a loop or vectorized)
-    c_raw_0 = c_keep[0]
-    c_raw_1 = c_keep[1]
-    m_raw   = c_keep + par.grid_a 
-    m_raw_0 = m_raw[0]
-    m_raw_1 = m_raw[1]
-    v_raw_0 = v_keep[0]
-    v_raw_1 = v_keep[1]
 
-
-    # This is all choices of c and associated value where the necessary condition of the euler is true.
-    # In the upper envelope algorithm below, all non optimal choices are removed.
-
-    ### first for housing state == 0 ###
-
-    # Reorderining making G_m strictly increasing 
-    m_0 = sorted(m_raw_0)  # alternatively, choose a common grid exogeneously. This, however, creates many points around the kink
-    I_0 = m_raw_0
-    c_0 = [x for _,x in sorted(zip(I_0,c_raw_0))]  # Here Thomas basically merges/zips the raw grids together, so that the c's and v's are associated with the correct m's
-    v_0 = [x for _,x in sorted(zip(I_0,v_raw_0))]
-
-    # Loop through the endogenous grid
-    for i in range(np.size(m_raw_0)-2): # Why minus 2? 
-        m_low_0 = m_raw_0[i]
-        m_high_0 = m_raw_0[i+1]
-        c_slope_0 = (c_raw_0[i+1]-c_raw_0[i])/(m_high_0-m_low_0)
-
-        # Loop through the common grid
-        for j in range(len(m_0)):
-
-            if  m_0[j]>=m_low_0 and m_0[j]<=m_high_0:
-
-                c_guess_0 = c_raw_0[i] + c_slope_0*(m_0[j]-m_low_0)
-                    # v_guess_0 = value_of_choice(m[j],c_guess,z_plus,t,sol,par) # value_of_choice should be changed to object_keep
-                v_guess_0 = obj_keep(c_guess_0, 0, m_0[j], v_next[0,par.N_bottom:], par, m_next[0,par.N_bottom:]) # check v_next
-
-                    # Update
-                if v_guess_0 >v_0[j]:
-                    v_0[j]=v_guess_0
-                    c_0[j]=c_guess_0
-
-    ### then for housing state == 1 ###
-
-    # Reorderining making G_m strictly increasing 
-    m_1 = sorted(m_raw_1)  # alternatively, choose a common grid exogeneously. This, however, creates many points around the kink
-    I_1 = m_raw_1
-    c_1 = [x for _,x in sorted(zip(I_1,c_raw_1))]  # Here Thomas basically merges/zips the raw grids together, so that the c's and v's are associated with the correct m's
-    v_1 = [x for _,x in sorted(zip(I_1,v_raw_1))]
-
-    # Loop through the endogenous grid
-    for i in range(np.size(m_raw_1)-2): # Why minus 2? 
-        m_low_1 = m_raw_1[i]
-        m_high_1 = m_raw_1[i+1]
-        c_slope_1 = (c_raw_1[i+1]-c_raw_1[i])/(m_high_1-m_low_1)
-
-        # Loop through the common grid
-        for j in range(len(m_1)):
-
-            if  m_1[j]>=m_low_1 and m_1[j]<=m_high_1:
-
-                c_guess_1 = c_raw_1[i] + c_slope_1*(m_1[j]-m_low_1)
-                v_guess_1 = obj_keep(c_guess_1, 1, m_1[j], v_next[1,par.N_bottom:], par, m_next[1,par.N_bottom:]) # check v_next
-
-                # Update
-                if v_guess_1 >v_1[j]:
-                    v_1[j]=v_guess_1
-                    c_1[j]=c_guess_1                    
-
-    # return m,c,v
-
-    #c = np.zeros(shape) + np.nan (old)
-    c_keep[0] = c_0
-    c_keep[1] = c_1
-    #v = np.zeros(shape) + np.nan (old)
-    v_keep[0] = v_0
-    v_keep[1] = v_1
-    m_grid = np.zeros(shape) + np.nan
-    m_grid[0] = m_0
-    m_grid[1] = m_1
-
-    
     # c. Solve the adjuster problem
 
     # Initialize
@@ -229,7 +148,91 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
 
     return sol
     
-    
+#############################
+## Upper envelope for NEGM ##
+#############################
+
+def upper_envelope(c_keep, v_keep, v_next, m_next, shape, par):
+
+    ## raw c, m and v for each housing state (can probably be written into a loop or vectorized)
+    c_raw_0 = c_keep[0]
+    c_raw_1 = c_keep[1]
+    m_raw   = c_keep + par.grid_a 
+    m_raw_0 = m_raw[0]
+    m_raw_1 = m_raw[1]
+    v_raw_0 = v_keep[0]
+    v_raw_1 = v_keep[1]
+
+
+    # This is all choices of c and associated value where the necessary condition of the euler is true.
+    # In the upper envelope algorithm below, all non optimal choices are removed.
+
+    ### first for housing state == 0 ###
+
+    # Reorderining making G_m strictly increasing 
+    m_0 = sorted(m_raw_0)  # alternatively, choose a common grid exogeneously. This, however, creates many points around the kink
+    I_0 = m_raw_0
+    c_0 = [x for _,x in sorted(zip(I_0,c_raw_0))]  # Here Thomas basically merges/zips the raw grids together, so that the c's and v's are associated with the correct m's
+    v_0 = [x for _,x in sorted(zip(I_0,v_raw_0))]
+
+    # Loop through the endogenous grid
+    for i in range(np.size(m_raw_0)-2): # Why minus 2? 
+        m_low_0 = m_raw_0[i]
+        m_high_0 = m_raw_0[i+1]
+        c_slope_0 = (c_raw_0[i+1]-c_raw_0[i])/(m_high_0-m_low_0)
+
+        # Loop through the common grid
+        for j in range(len(m_0)):
+
+            if  m_0[j]>=m_low_0 and m_0[j]<=m_high_0:
+
+                c_guess_0 = c_raw_0[i] + c_slope_0*(m_0[j]-m_low_0)
+                    # v_guess_0 = value_of_choice(m[j],c_guess,z_plus,t,sol,par) # value_of_choice should be changed to object_keep
+                v_guess_0 = obj_keep(c_guess_0, 0, m_0[j], v_next[0,par.N_bottom:], par, m_next[0,par.N_bottom:]) # check v_next
+
+                    # Update
+                if v_guess_0 >v_0[j]:
+                    v_0[j]=v_guess_0
+                    c_0[j]=c_guess_0
+
+    ### then for housing state == 1 ###
+
+    # Reorderining making G_m strictly increasing 
+    m_1 = sorted(m_raw_1)  # alternatively, choose a common grid exogeneously. This, however, creates many points around the kink
+    I_1 = m_raw_1
+    c_1 = [x for _,x in sorted(zip(I_1,c_raw_1))]  # Here Thomas basically merges/zips the raw grids together, so that the c's and v's are associated with the correct m's
+    v_1 = [x for _,x in sorted(zip(I_1,v_raw_1))]
+
+    # Loop through the endogenous grid
+    for i in range(np.size(m_raw_1)-2): # Why minus 2? 
+        m_low_1 = m_raw_1[i]
+        m_high_1 = m_raw_1[i+1]
+        c_slope_1 = (c_raw_1[i+1]-c_raw_1[i])/(m_high_1-m_low_1)
+
+        # Loop through the common grid
+        for j in range(len(m_1)):
+
+            if  m_1[j]>=m_low_1 and m_1[j]<=m_high_1:
+
+                c_guess_1 = c_raw_1[i] + c_slope_1*(m_1[j]-m_low_1)
+                v_guess_1 = obj_keep(c_guess_1, 1, m_1[j], v_next[1,par.N_bottom:], par, m_next[1,par.N_bottom:]) # check v_next
+
+                # Update
+                if v_guess_1 >v_1[j]:
+                    v_1[j]=v_guess_1
+                    c_1[j]=c_guess_1                    
+
+    #c = np.zeros(shape) + np.nan (old)
+    c_keep[0] = c_0
+    c_keep[1] = c_1
+    #v = np.zeros(shape) + np.nan (old)
+    v_keep[0] = v_0
+    v_keep[1] = v_1
+    m_grid = np.zeros(shape) + np.nan
+    m_grid[0] = m_0
+    m_grid[1] = m_1
+
+    return c_keep, v_keep, m_grid
 
 
 ######################
