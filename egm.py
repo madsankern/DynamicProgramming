@@ -103,8 +103,8 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
                 x = m - p*(h - n)
 
                 # Value of choice
-                v_adj[n,a_i] = tools.interp_linear_1d_scalar(m_grid[n], v_keep[h,:], x) # endogenous grid or par.grid_m?
-                c_adj[n,a_i] = tools.interp_linear_1d_scalar(m_grid[n], c_keep[h,:], x) # endogenous grid or par.grid_m?
+                v_adj[n,a_i] = tools.interp_linear_1d_scalar(m_grid[h], v_keep[h,:], x) # endogenous grid or par.grid_m?
+                c_adj[n,a_i] = tools.interp_linear_1d_scalar(m_grid[h], c_keep[h,:], x) # endogenous grid or par.grid_m?
                 h_adj[n,a_i] = h
 
     # c. Combine solutions

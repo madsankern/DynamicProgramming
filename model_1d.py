@@ -55,7 +55,7 @@ class model_1d():
         par.pi = np.asarray(par.pi_list)
 
         # Extra parameters for housing
-        par.kappa = 2.25
+        par.kappa = 1.25
         par.ph = 3.0
         par.p1 = 3.0
 
