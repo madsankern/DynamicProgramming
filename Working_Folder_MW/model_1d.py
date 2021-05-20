@@ -10,7 +10,7 @@ import fd
 import utility as util
 # import scipy.optimize as optimize
 import last_period
-import last_period_negm
+
 
 class model_1d():
 
@@ -23,7 +23,6 @@ class model_1d():
         self.sol_nvfi = SimpleNamespace()
         self.sol_egm = SimpleNamespace()
         self.sol_fd = SimpleNamespace()
-        self.sol_negm = SimpleNamespace()
 
     ###########
     ## Setup ##
@@ -42,7 +41,7 @@ class model_1d():
         par.eta = 0.5
         
         par.r = 0.01
-        par.y1 = 1.5
+        par.y1 = 1.0
         par.y2 = 2.0
         par.y = np.array([par.y1, par.y2])
         
@@ -55,7 +54,7 @@ class model_1d():
         par.pi = np.asarray(par.pi_list)
 
         # Extra parameters for housing
-        par.kappa = 2.25
+        par.kappa = 0.25
         par.ph = 3.0
 
         # Grid settings
@@ -63,7 +62,7 @@ class model_1d():
         par.m_max = 10.0
         par.m_min = 1e-4
 
-        par.Na = 100
+        par.Na = 50
         par.a_min = 1e-4
         par.a_max = par.m_max + 1.0 # Check this out later
 
@@ -71,12 +70,10 @@ class model_1d():
         par.x_max = par.m_max + par.ph # add price of selling house to the top of the x grid (grid when selling/buying house)
         par.x_min = 1e-4
         
-        par.max_iter = 5
+        par.max_iter = 50
         par.tol_vfi = 10e-4
         par.tol_egm = 10e-4
         par.tol_fd = 10e-4
-
-        par.N_bottom = 10 
 
     # Asset grids
     def create_grids(self):
@@ -207,7 +204,7 @@ class model_1d():
         shape = (2,np.size(par.grid_m)) #  Row for each state of housing
 
         # Initialize
-        sol.m = np.tile(np.linspace(par.a_min,par.a_max,par.Na), (2,1)) # should it be 'par.Na+1' and should it be 'shape' instead of (2,1)?
+        sol.m = np.tile(np.linspace(par.a_min,par.a_max,par.Na+1), shape)
         sol.c = np.zeros(shape) + np.nan
         sol.h = np.zeros(shape) + np.nan
         sol.v = np.zeros(shape) + np.nan
@@ -231,11 +228,10 @@ class model_1d():
 
             sol.it += 1
             
+            
 ################
 ## Nested EGM ##
 ################
-    
-    def solve_negm_dc(self):
 
         # Solve my backwards induction. In the last period, solve by last_period.py. 
         # Then solve backwards until covergence
@@ -245,43 +241,29 @@ class model_1d():
         sol = self.sol_negm
 
         # Shape parameter
-        shape = (2,np.size(par.grid_a) + par.N_bottom) #  Row for each state of housing and columns for exogenous end-of-period asset grid 
+        shape = (2,np.size(par.grid_m)) #  Row for each state of housing
 
         # Initialize
-        sol.m = np.tile(np.linspace(par.a_min,par.a_max,par.Na + par.N_bottom), (2,1))
+        sol.m = np.tile(np.linspace(par.a_min,par.a_max,par.Na+1), shape)
         sol.c = np.zeros(shape) + np.nan
         sol.h = np.zeros(shape) + np.nan
         sol.v = np.zeros(shape) + np.nan
 
         # Solve last period
-        last_period_negm.solve(sol,par)
+        last_period.solve(sol,par)
 
         sol.it = 0 # Iteration counter
         sol.delta = 1000.0 # Difference between iterations
 
         # Iterate value function until convergence or break if no convergence
         while (sol.delta >= par.tol_egm and sol.it < par.max_iter):
-            
+
             # Continuation value
-            m_next = sol.m.copy()
             c_next = sol.c.copy()
             h_next = sol.h.copy()            
             v_next = sol.v.copy()
 
             # Solve the keeper problem
-            sol = egm.solve_dc(sol, par, v_next, c_next, h_next, m_next)
+            sol = egm.solve_NEGM(sol, par, v_next, c_next, h_next)
 
-            # # Add points at the constraints (alternatively, look at exercise 1) --> DONE INSIDE EGM.PY
-            # m_con = np.linspace(0+1e-8,m[0]-1e-8,par.N_bottom)
-            # c_con = m_con.copy()
-            # v_con = value_of_choice(m_con,c_con,z_plus,t,sol,par)
-
-            # for n in range(2):
-            #     sol.m[n] = np.append(m_con_'n', m)
-            #     sol.c[n] = np.append(c_con_'n', c)
-            #     sol.h[n] = np.append(v_con_'n', v)
-            #     sol.v[n] = np.append(v_con_'n', v)
-                
             sol.it += 1
-            
-            

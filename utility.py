@@ -1,9 +1,6 @@
-# Define utility function of the households
 import numpy as np
-import model_2
-import model_1d
 
-# Utility
+# Without housing
 def u(c,par):
 
     if par.eta == 1.0:
@@ -14,6 +11,17 @@ def u(c,par):
 
     return u
 
+# With housing
+def u_h(c,h,par):
+
+    if par.eta == 1.0:
+        u = np.log(c) + par.kappa*h
+
+    else:
+        u = (c**(1-par.eta) - 1.0) / (1.0 - par.eta) + par.kappa*h
+
+    return u
+
 # Marginal utility
 def marg_u(c,par):
     return c**(-par.eta)
@@ -21,20 +29,3 @@ def marg_u(c,par):
 # Inverse marginal utility
 def inv_marg_u(u,par):
     return u**(-1.0/par.eta)
-
-
-
-    # Utility with housing
-def u_with_housing(c,h,par):
-
-    if par.eta == 1.0:
-        u1 = np.log(c)
-
-    else:
-        u1 = (c**(1-par.eta) - 1.0) / (1.0 - par.eta)
-    
-    #u2 = par.b*h**par.alpha
-    u2 = h
-
-    u = u1 + u2
-    return u
