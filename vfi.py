@@ -90,7 +90,12 @@ def solve_dc(sol, par, v_next, c_next, h_next):
             else:
 
                 # Assets available after adjusting
-                x = m - par.ph*(h - n)
+                if n==1:
+                    p = par.p1
+                else:
+                    p = par.ph
+
+                x = m - p*(h - n)
 
                 # Value of choice
                 v_adj[n,m_i] = tools.interp_linear_1d_scalar(par.grid_m, v_keep[h,:], x)

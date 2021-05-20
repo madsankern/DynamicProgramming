@@ -175,7 +175,12 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
             else:
 
                 # Assets available after adjusting
-                x = m - par.ph*(h - n)
+                if n==1:
+                    p = par.p1
+                else:
+                    p = par.ph
+
+                x = m - p*(h - n)
 
                 # Value of choice
                 v_adj[n,a_i] = tools.interp_linear_1d_scalar(m_grid[n], v_keep[h,:], x) # endogenous grid or par.grid_m?
