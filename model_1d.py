@@ -39,7 +39,7 @@ class model_1d():
         # Model
         par.beta =  0.98
         par.rho = 1.0 - par.beta
-        par.eta = 0.5
+        par.eta = 1
         
         par.r = 0.01
         par.y1 = 1.5
@@ -72,7 +72,7 @@ class model_1d():
         par.x_max = par.m_max + par.ph # add price of selling house to the top of the x grid (grid when selling/buying house)
         par.x_min = 1e-4
         
-        par.max_iter = 4
+        par.max_iter = 1
         par.tol_vfi = 10e-4
         par.tol_egm = 10e-4
         par.tol_fd = 10e-4
