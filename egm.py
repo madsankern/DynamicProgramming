@@ -71,13 +71,38 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
     # m_grid[1] = m_grid[1] # debugger only
 
     ### Add points at the constraints ###
+    
+    m_con_0 = np.linspace(0+1e-8,m_grid[0,0]-1e-4,par.N_bottom)
+    m_con_1 = np.linspace(0+1e-8,m_grid[1,0]-1e-4,par.N_bottom)
+    c_con_0 = m_con_0.copy()
+    c_con_1 = m_con_1.copy()
+    v_con_0 = [obj_keep(c_con_0[i],0,m_con_0[i],v_next[0, :], par, m_next[0, :]) for i in range(par.N_bottom)] # From N_bottom or whole
+    v_con_1 = [obj_keep(c_con_1[i],1,m_con_1[i],v_next[1, :], par, m_next[1, :]) for i in range(par.N_bottom)] # From N_bottom or whole
+
+    # initialize new larger keeper containers
+
+    new_shape = (2,np.size(par.grid_a) + par.N_bottom)
+    c_keep_append = np.zeros(new_shape) + np.nan
+    v_keep_append = np.zeros(new_shape) + np.nan
+    m_grid_append = np.zeros(new_shape) + np.nan
+
+    # append
+
+    c_keep_append[0, :] = np.append(c_con_0, c_keep[0, :])
+    c_keep_append[1, :] = np.append(c_con_1, c_keep[1, :])
+
+    v_keep_append[0, :] = np.append(v_con_0, v_keep[0, :])
+    v_keep_append[1, :] = np.append(v_con_1, v_keep[1, :])
+
+    m_grid_append[0, :] = np.append(m_con_0, m_grid[0, :])
+    m_grid_append[1, :] = np.append(m_con_1, m_grid[1, :])
 
     # b. Solve the adjuster problem
 
     # Initialize
-    v_adj = np.zeros(shape) + np.nan
-    c_adj = np.zeros(shape) + np.nan
-    h_adj = np.zeros(shape) + np.nan
+    v_adj = np.zeros(new_shape) + np.nan
+    c_adj = np.zeros(new_shape) + np.nan
+    h_adj = np.zeros(new_shape) + np.nan
 
     # Loop over housing state
     for n in range(2):
@@ -86,7 +111,7 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
         h = 1 - n
 
         # Loop over asset grid
-        for a_i,m in enumerate(m_grid[n]): # endogenous grid or par.grid_m?
+        for a_i,m in enumerate(m_grid_append[n]): # endogenous grid or par.grid_m?
 
             # If adjustment is not possible
             if n == 0 and m < par.ph :
@@ -105,29 +130,29 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
                 x = m - p*(h - n)
 
                 # Value of choice
-                v_adj[n,a_i] = tools.interp_linear_1d_scalar(m_grid[h], v_keep[h,:], x) # endogenous grid or par.grid_m?
-                c_adj[n,a_i] = tools.interp_linear_1d_scalar(m_grid[h], c_keep[h,:], x) # endogenous grid or par.grid_m?
+                v_adj[n,a_i] = tools.interp_linear_1d_scalar(m_grid_append[h], v_keep_append[h,:], x) # endogenous grid or par.grid_m?
+                c_adj[n,a_i] = tools.interp_linear_1d_scalar(m_grid_append[h], c_keep_append[h,:], x) # endogenous grid or par.grid_m?
                 h_adj[n,a_i] = h
 
     # c. Combine solutions
 
     # Loop over asset grid again
     for n in range(2):
-        for a_i,m in enumerate(m_grid[n]): # endogenous grid or par.grid_m?
+        for a_i,m in enumerate(m_grid_append[n]): # endogenous grid or par.grid_m?
             
             # If keeping is optimal
-            if v_keep[n,a_i] > v_adj[n,a_i]:
-                sol.v[n,a_i+par.N_bottom] = v_keep[n,a_i]
-                sol.c[n,a_i+par.N_bottom] = c_keep[n,a_i]
-                sol.h[n,a_i+par.N_bottom] = n
-                sol.m[n,a_i+par.N_bottom] = m_grid[n,a_i] # added
+            if v_keep_append[n,a_i] > v_adj[n,a_i]:
+                sol.v[n,a_i] = v_keep_append[n,a_i]
+                sol.c[n,a_i] = c_keep_append[n,a_i]
+                sol.h[n,a_i] = n
+                sol.m[n,a_i] = m_grid_append[n,a_i] # added
 
             # If adjusting is optimal
             else:
-                sol.v[n,a_i+par.N_bottom] = v_adj[n,a_i]
-                sol.c[n,a_i+par.N_bottom] = c_adj[n,a_i]
-                sol.h[n,a_i+par.N_bottom] = 1 - n
-                sol.m[n,a_i+par.N_bottom] = m_grid[n,a_i] # added
+                sol.v[n,a_i] = v_adj[n,a_i]
+                sol.c[n,a_i] = c_adj[n,a_i]
+                sol.h[n,a_i] = 1 - n
+                sol.m[n,a_i] = m_grid_append[n,a_i] # added
                 
                 
     # sol.c[:,0] = 0.0
@@ -136,22 +161,22 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
 
     # add points at the constraints (can be looped or vectorized)
 
-    m_con_0 = np.linspace(0+1e-8,m_grid[0,0]-1e-4,par.N_bottom)
-    m_con_1 = np.linspace(0+1e-8,m_grid[1,0]-1e-4,par.N_bottom)
-    c_con_0 = m_con_0.copy()
-    c_con_1 = m_con_1.copy()
-    v_con_0 = [obj_keep(c_con_0[i],0,m_con_0[i],v_next[0, :], par, m_next[0, :]) for i in range(par.N_bottom)] # From N_bottom or whole
-    v_con_1 = [obj_keep(c_con_1[i],1,m_con_1[i],v_next[1, :], par, m_next[1, :]) for i in range(par.N_bottom)] # From N_bottom or whole
+    # m_con_0 = np.linspace(0+1e-8,m_grid[0,0]-1e-4,par.N_bottom)
+    # m_con_1 = np.linspace(0+1e-8,m_grid[1,0]-1e-4,par.N_bottom)
+    # c_con_0 = m_con_0.copy()
+    # c_con_1 = m_con_1.copy()
+    # v_con_0 = [obj_keep(c_con_0[i],0,m_con_0[i],v_next[0, :], par, m_next[0, :]) for i in range(par.N_bottom)] # From N_bottom or whole
+    # v_con_1 = [obj_keep(c_con_1[i],1,m_con_1[i],v_next[1, :], par, m_next[1, :]) for i in range(par.N_bottom)] # From N_bottom or whole
 
-    for i in range(par.N_bottom):
-        sol.m[0,i] = m_con_0[i]
-        sol.m[1,i] = m_con_1[i]
-        sol.c[0,i] = c_con_0[i]
-        sol.c[1,i] = c_con_1[i]
-        sol.v[0,i] = v_con_0[i]
-        sol.v[1,i] = v_con_1[i]
-        sol.h[0,i] = sol.h[0,0] # equal to whatever the housing choice is at the beginning of the endogenous solution
-        sol.h[1,i] = sol.h[1,0]
+    # for i in range(par.N_bottom):
+    #     sol.m[0,i] = m_con_0[i]
+    #     sol.m[1,i] = m_con_1[i]
+    #     sol.c[0,i] = c_con_0[i]
+    #     sol.c[1,i] = c_con_1[i]
+    #     sol.v[0,i] = v_con_0[i]
+    #     sol.v[1,i] = v_con_1[i]
+    #     sol.h[0,i] = sol.h[0,0] # equal to whatever the housing choice is at the beginning of the endogenous solution
+    #     sol.h[1,i] = sol.h[1,0]
 
     return sol
     
