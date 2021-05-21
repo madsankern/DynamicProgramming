@@ -39,7 +39,7 @@ class model_1d():
         # Model
         par.beta =  0.98
         par.rho = 1.0 - par.beta
-        par.eta = 1
+        par.eta = 0.5
         
         par.r = 0.01
         par.y1 = 1.5
@@ -55,24 +55,24 @@ class model_1d():
         par.pi = np.asarray(par.pi_list)
 
         # Extra parameters for housing
-        par.kappa = 1.25
-        par.ph = 3.0
-        par.p1 = 3.0
+        par.kappa = 1.0
+        par.ph = 4.0
+        par.p1 = 4.0
 
         # Grid settings
-        par.Nm = 100
+        par.Nm = 100 
         par.m_max = 10.0
         par.m_min = 1e-4
 
-        par.Na = 100
+        par.Na = par.Nm
         par.a_min = par.m_min
         par.a_max = par.m_max # Check this out later
 
-        par.Nx = 100
+        par.Nx = par.Nm
         par.x_max = par.m_max + par.ph # add price of selling house to the top of the x grid (grid when selling/buying house)
         par.x_min = 1e-4
         
-        par.max_iter = 1
+        par.max_iter = 100
         par.tol_vfi = 10e-4
         par.tol_egm = 10e-4
         par.tol_fd = 10e-4

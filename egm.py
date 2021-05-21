@@ -46,7 +46,7 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
             m_plus = (1+par.r)*a + par.y1
 
             # Interpolate next periods consumption 
-            c_plus = tools.interp_linear_1d_scalar(m_next[n,par.N_bottom:], c_next[n,par.N_bottom:], m_plus) 
+            c_plus = tools.interp_linear_1d_scalar(m_next[n,:], c_next[n,:], m_plus) 
             
             # Marginal utility
             marg_u_plus = util.marg_u(c_plus,par)
@@ -59,7 +59,7 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
             #sol.v = util.u(sol.c,par)
              
             c_keep[n,a_i] = util.inv_marg_u((1+par.r)*par.beta*marg_u_plus,par) #### no average
-            v_keep[n,a_i] = obj_keep(c_keep[n,a_i], n, c_keep[n,a_i] + a, v_next[n, par.N_bottom:], par, m_next[n, par.N_bottom:]) # OLD: util.u_h(c_keep[n,a_i],n,par)
+            v_keep[n,a_i] = obj_keep(c_keep[n,a_i], n, c_keep[n,a_i] + a, v_next[n,:], par, m_next[n, :]) # From par.N_bottom or whole grid?
             h_keep[n,a_i] = n 
 
     ### UPPER ENVELOPE ###
@@ -69,6 +69,8 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
     # m_grid   = c_keep + par.grid_a # debugger only
     # m_grid[0] = m_grid[0] # debugger only
     # m_grid[1] = m_grid[1] # debugger only
+
+    ### Add points at the constraints ###
 
     # b. Solve the adjuster problem
 
@@ -112,7 +114,7 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
     # Loop over asset grid again
     for n in range(2):
         for a_i,m in enumerate(m_grid[n]): # endogenous grid or par.grid_m?
-
+            
             # If keeping is optimal
             if v_keep[n,a_i] > v_adj[n,a_i]:
                 sol.v[n,a_i+par.N_bottom] = v_keep[n,a_i]
@@ -127,15 +129,19 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
                 sol.h[n,a_i+par.N_bottom] = 1 - n
                 sol.m[n,a_i+par.N_bottom] = m_grid[n,a_i] # added
                 
+                
+    # sol.c[:,0] = 0.0
+    # sol.m[:,0] = 0.0
+    # sol.v[:,0] = 0.0
 
     # add points at the constraints (can be looped or vectorized)
 
-    m_con_0 = np.linspace(0+1e-8,m_grid[0,0]-1e-8,par.N_bottom)
-    m_con_1 = np.linspace(0+1e-8,m_grid[1,0]-1e-8,par.N_bottom)
+    m_con_0 = np.linspace(0+1e-8,m_grid[0,0]-1e-4,par.N_bottom)
+    m_con_1 = np.linspace(0+1e-8,m_grid[1,0]-1e-4,par.N_bottom)
     c_con_0 = m_con_0.copy()
     c_con_1 = m_con_1.copy()
-    v_con_0 = [obj_keep(c_con_0[i],0,m_con_0[i],v_next[0], par, m_next[0]) for i in range(par.N_bottom)]
-    v_con_1 = [obj_keep(c_con_1[i],1,m_con_1[i],v_next[1], par, m_next[1]) for i in range(par.N_bottom)]
+    v_con_0 = [obj_keep(c_con_0[i],0,m_con_0[i],v_next[0, :], par, m_next[0, :]) for i in range(par.N_bottom)] # From N_bottom or whole
+    v_con_1 = [obj_keep(c_con_1[i],1,m_con_1[i],v_next[1, :], par, m_next[1, :]) for i in range(par.N_bottom)] # From N_bottom or whole
 
     for i in range(par.N_bottom):
         sol.m[0,i] = m_con_0[i]
