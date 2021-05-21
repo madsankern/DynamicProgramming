@@ -55,7 +55,7 @@ class model_1d():
         par.pi = np.asarray(par.pi_list)
 
         # Extra parameters for housing
-        par.kappa = 1.0
+        par.kappa = 0.25
         par.ph = 4.0
         par.p1 = 4.0
 
@@ -72,7 +72,7 @@ class model_1d():
         par.x_max = par.m_max + par.ph # add price of selling house to the top of the x grid (grid when selling/buying house)
         par.x_min = 1e-4
         
-        par.max_iter = 200
+        par.max_iter = 25
         par.tol_vfi = 10e-4
         par.tol_egm = 10e-4
         par.tol_fd = 10e-4

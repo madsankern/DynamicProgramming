@@ -66,9 +66,6 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
 
     c_keep, v_keep, m_grid = upper_envelope(c_keep, v_keep, v_next, m_next, shape, par)
             
-    # m_grid   = c_keep + par.grid_a # debugger only
-    # m_grid[0] = m_grid[0] # debugger only
-    # m_grid[1] = m_grid[1] # debugger only
 
     ### Add points at the constraints ###
     
@@ -154,29 +151,6 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
                 sol.h[n,a_i] = 1 - n
                 sol.m[n,a_i] = m_grid_append[n,a_i] # added
                 
-                
-    # sol.c[:,0] = 0.0
-    # sol.m[:,0] = 0.0
-    # sol.v[:,0] = 0.0
-
-    # add points at the constraints (can be looped or vectorized)
-
-    # m_con_0 = np.linspace(0+1e-8,m_grid[0,0]-1e-4,par.N_bottom)
-    # m_con_1 = np.linspace(0+1e-8,m_grid[1,0]-1e-4,par.N_bottom)
-    # c_con_0 = m_con_0.copy()
-    # c_con_1 = m_con_1.copy()
-    # v_con_0 = [obj_keep(c_con_0[i],0,m_con_0[i],v_next[0, :], par, m_next[0, :]) for i in range(par.N_bottom)] # From N_bottom or whole
-    # v_con_1 = [obj_keep(c_con_1[i],1,m_con_1[i],v_next[1, :], par, m_next[1, :]) for i in range(par.N_bottom)] # From N_bottom or whole
-
-    # for i in range(par.N_bottom):
-    #     sol.m[0,i] = m_con_0[i]
-    #     sol.m[1,i] = m_con_1[i]
-    #     sol.c[0,i] = c_con_0[i]
-    #     sol.c[1,i] = c_con_1[i]
-    #     sol.v[0,i] = v_con_0[i]
-    #     sol.v[1,i] = v_con_1[i]
-    #     sol.h[0,i] = sol.h[0,0] # equal to whatever the housing choice is at the beginning of the endogenous solution
-    #     sol.h[1,i] = sol.h[1,0]
 
     return sol
     
