@@ -109,22 +109,23 @@ def solve(par,sol):
 ## FD - LCP ##
 ##############
 # Solve the discrete-continuous problem using linear complementarity
+# There is still a bit of work left for this
 
 s = 2 # Elasticity of substitution 
 r = 0.045 # Rate of return
 rho = 0.05 # Discount rate
-y = .1 # Income
-kappa = 0.25 # Housing utility
-p0 = 1.0 #buying price
-p1 = .5 #selling price
+y = .5 # Income
+kappa = 0.2 # Housing utility
+p0 = 2.0 #buying price
+p1 = 1.6 #selling price
 
 I = 500 # Gridpoints on asset grid
-amin = 1e-4 # Minimum assets
+amin = 1e-8 # Minimum assets
 amax = 10 # Maximum assets
 a = np.linspace(amin,amax,I).transpose() # a grid
 da = (amax-amin)/(I-1) # Stepsize for a
 
-maxit = 10 # Max number of iterations
+maxit = 20 # Max number of iterations
 crit = 1e-3 # Stopping criteria
 it = 0
 
@@ -173,7 +174,6 @@ while (delta >= crit and it < maxit):
     #consumption and savings with backward difference
     cb = np.power(dVb, -1/s)
     ssb = yy + r*aa - cb
-
 
     #consumption and derivative of value function at steady state
     c0 = yy + r*aa
@@ -245,11 +245,11 @@ while (delta >= crit and it < maxit):
 
     # using Yuval Tassa's Newton-based LCP solver, download from http://www.mathworks.com/matlabcentral/fileexchange/20952
     z0 = V_stacked - Vstar_stacked
-    l = np.zeros(2*I) + 1e-6 # added small term for numerics
-    u_ = np.inf*np.ones(2*I)
+    l = np.zeros(2*I) #+ 1e-6 # added small term for numerics
+    u_ = 100*np.ones(2*I) ## Upper limit on consumption
 
     # Seems to work now
-    z = LCP_solver.LCP_python(B,q,l,u_,z0,0)
+    z = LCP_solver.LCP_python(M=B,q=q,l=l,x0=z0,display=False)
 
     # LCP_error = np.max(abs(z*(B*z + q)))
 
