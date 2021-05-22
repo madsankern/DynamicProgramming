@@ -34,7 +34,7 @@ def inv_marg_u(u,par):
 def inv_u(u,par):
 
     if par.eta == 1.0:
-        val = 1.0/u
+        val = np.exp(u)
     
     else:
         val = ((1.0-par.eta)*u + 1.0)**(1.0/(1.0-par.eta))
