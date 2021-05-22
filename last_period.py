@@ -7,7 +7,7 @@ def solve(sol, par):
 
     grid_last = np.linspace(par.m_min, par.m_max, par.Nm + par.N_bottom)
 
-    if np.size(sol.c[0,:]) >= 101:
+    if np.size(sol.c[0,:]) >= par.Nm:
         grid = grid_last
     else:
         grid = par.grid_m

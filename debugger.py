@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import tools 
-from model_1d import model_1d
+from model import model
 
 # Setup model
 model = model_1d()
