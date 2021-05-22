@@ -38,12 +38,12 @@ class model():
 
         # Model
         par.beta =  0.98
-        par.rho = 1.0 - par.beta
-        par.eta = 0.5
+        par.rho = 1/par.beta - 1
+        par.eta = 1.0
         
         par.r = 0.01
-        par.y1 = 1.5
-        par.y2 = 2.0
+        par.y1 = .5
+        par.y2 = 1.5
         par.y = np.array([par.y1, par.y2])
         
         par.P_11 = 0.6
