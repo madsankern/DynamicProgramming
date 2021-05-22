@@ -256,7 +256,7 @@ class model_class():
         sol.v = np.zeros(shape) + np.nan
 
         # Solve last period
-        last_period_negm.solve(sol,par)
+        last_period.solve(sol,par)
 
         sol.it = 0 # Iteration counter
         sol.delta = 1000.0 # Difference between iterations
