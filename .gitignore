@@ -3,3 +3,6 @@ __pycache__/
 .ipynb_checkpoints
 mads_tests.ipynb
 debugger.py
+debugger2.py
+tradeoff.pdf
+LCP_Python.ipynb
