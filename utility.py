@@ -29,3 +29,14 @@ def marg_u(c,par):
 # Inverse marginal utility
 def inv_marg_u(u,par):
     return u**(-1.0/par.eta)
+
+# Inverse utility
+def inv_u(u,par):
+
+    if par.eta == 1.0:
+        val = 1.0/u
+    
+    else:
+        val = ((1.0-par.eta)*u + 1.0)**(1.0/(1.0-par.eta))
+
+    return val
