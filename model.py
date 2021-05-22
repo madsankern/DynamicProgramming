@@ -37,12 +37,12 @@ class model_class():
         par = self.par
 
         # Model
-        par.beta =  0.96
+        par.beta =  0.99
         par.rho = 1/par.beta - 1
         par.eta = 1.0
         
-        par.r = 0.03
-        par.y1 = .5
+        par.r = 0.01
+        par.y1 = 1.0
         par.y2 = 1.5
         par.y = np.array([par.y1, par.y2])
         
@@ -56,8 +56,8 @@ class model_class():
 
         # Extra parameters for housing
         par.kappa = 0.25
-        par.ph = 4.0
-        par.p1 = 4.0
+        par.ph = 3.0
+        par.p1 = 2.0
 
         # Grid settings
         par.Nm = 100 
@@ -72,7 +72,7 @@ class model_class():
         par.x_max = par.m_max + par.ph # add price of selling house to the top of the x grid (grid when selling/buying house)
         par.x_min = 1e-4
         
-        par.max_iter = 500
+        par.max_iter = 1000
         par.tol_vfi = 10e-6
         par.tol_egm = 10e-6
         par.tol_fd = 10e-8
@@ -231,6 +231,7 @@ class model_class():
             sol = vfi.solve_dc(sol, par, v_next, c_next, h_next)
 
             sol.it += 1
+            sol.delta = max( max(abs(sol.v[0] - v_next[0])), max(abs(sol.v[1] - v_next[1]))) # Update this maybe
             
 ################
 ## Nested EGM ##
@@ -255,7 +256,7 @@ class model_class():
         sol.v = np.zeros(shape) + np.nan
 
         # Solve last period
-        last_period_negm.solve(sol,par)
+        last_period.solve(sol,par)
 
         sol.it = 0 # Iteration counter
         sol.delta = 1000.0 # Difference between iterations
@@ -274,5 +275,6 @@ class model_class():
 
                 
             sol.it += 1
+            sol.delta = max( max(abs(sol.v[0] - v_next[0])), max(abs(sol.v[1] - v_next[1]))) # Update this maybe
             
             

@@ -5,8 +5,15 @@ import numpy as np
 
 def solve(sol, par):
 
+    grid_last = np.linspace(par.m_min, par.m_max, par.Nm + par.N_bottom)
+
+    if np.size(sol.c[0,:]) >= 101:
+        grid = grid_last
+    else:
+        grid = par.grid_m
+
     for n in range(2): # Loop over housing state
-        for m_i,m in enumerate(par.grid_m): # Loop over exogeneous asset grid
+        for m_i,m in enumerate(grid): # Loop over exogeneous asset grid
                  
                 if n == 0:
 
