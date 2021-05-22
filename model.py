@@ -37,11 +37,11 @@ class model():
         par = self.par
 
         # Model
-        par.beta =  0.98
+        par.beta =  0.96
         par.rho = 1/par.beta - 1
         par.eta = 1.0
         
-        par.r = 0.01
+        par.r = 0.03
         par.y1 = .5
         par.y2 = 1.5
         par.y = np.array([par.y1, par.y2])
@@ -51,7 +51,7 @@ class model():
         par.P = np.array([[par.P_11, 1 - par.P_11], [1 - par.P_22, par.P_22]]) # Transition matrix
 
         # Poisson jumps - rewrite to correspond to P above
-        par.pi_list = [[-0.1, 0.1], [0.1, -0.1]]
+        par.pi_list = [[-0.11, 0.11], [0.11, -0.11]]
         par.pi = np.asarray(par.pi_list)
 
         # Extra parameters for housing
@@ -61,7 +61,7 @@ class model():
 
         # Grid settings
         par.Nm = 100 
-        par.m_max = 10.0
+        par.m_max = 20.0
         par.m_min = 1e-4
 
         par.Na = par.Nm
@@ -72,10 +72,10 @@ class model():
         par.x_max = par.m_max + par.ph # add price of selling house to the top of the x grid (grid when selling/buying house)
         par.x_min = 1e-4
         
-        par.max_iter = 25
-        par.tol_vfi = 10e-4
-        par.tol_egm = 10e-4
-        par.tol_fd = 10e-4
+        par.max_iter = 500
+        par.tol_vfi = 10e-6
+        par.tol_egm = 10e-6
+        par.tol_fd = 10e-8
 
         par.N_bottom = 10 
 
