@@ -39,7 +39,7 @@ class model_class():
         # Model
         par.beta =  0.99
         par.rho = 1/par.beta - 1
-        par.eta = 1.0
+        par.eta = 0.5
         
         par.r = 0.01
         par.y1 = 1.0
@@ -256,7 +256,7 @@ class model_class():
         sol.v = np.zeros(shape) + np.nan
 
         # Solve last period
-        last_period.solve(sol,par)
+        last_period_negm.solve(sol,par)
 
         sol.it = 0 # Iteration counter
         sol.delta = 1000.0 # Difference between iterations

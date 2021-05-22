@@ -1,10 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import tools 
-from model import model
+from model import model_class as model
 
 # Setup model
-model = model_1d()
+model = model()
 model.setup()
 model.create_grids()
 
