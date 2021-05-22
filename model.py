@@ -12,7 +12,7 @@ import utility as util
 import last_period
 import last_period_negm
 
-class model_1d():
+class model():
 
     def __init__(self,name=None):
         """ defines default attributes """
