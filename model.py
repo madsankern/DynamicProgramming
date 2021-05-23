@@ -119,9 +119,6 @@ class model_class():
         sol.v = util.u(sol.c,par) # Utility of consumption
         sol.m = par.grid_m.copy() # Copy the exogenous asset grid for consistency (with EGM algortihm)
 
-        state1 = 0 # UNEMPLOYMENT STATE
-        state2 = 1 # EMPLOYMENT STATE
-
         sol.it = 0 # Iteration counters
         sol.delta = 1000.0 # Distance between iterations
 
@@ -132,7 +129,7 @@ class model_class():
             v_next = sol.v.copy()
 
             # Find optimal c given v_next
-            sol = vfi.solve(sol, par, v_next, state1, state2)
+            sol = vfi.solve(sol, par, v_next)
                     
             # Update iteration parameters
             sol.it += 1

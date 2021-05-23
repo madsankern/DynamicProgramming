@@ -129,33 +129,25 @@ def solve_dc(sol, par, v_next, c_next, h_next):
 ##############################
 # This is the VFI algortihm for solving the simple consumption saving model.
 
-def solve(sol, par, v_next, state1, state2):
+def solve(sol, par, v_next):
 
     # Loop over asset grid
     for m_i,m in enumerate(par.grid_m):
 
-        # FUNCTIONS BELOW CAN BE WRITTEN AS LOOP - for i=0,1 - AND BE STORED IN AN ARRAY/LIST WITH TWO ENTRIES - a la res[i]=optimize.minimize....
+        # Loop over income states
+        for y in range(2):
 
-        # Minimize the minus the value function wrt consumption conditional on unemployment state
-        obj_fun = lambda x : - value_of_choice(x,m,par.grid_m,v_next[0,:],par,state1)
-        res_1 = optimize.minimize_scalar(obj_fun, bounds=[0+1.0e-4, m+1.0e-4], method='bounded')
-
-        # Minimize the minus the value function wrt consumption conditional on employment state
-        obj_fun = lambda x : - value_of_choice(x,m,par.grid_m,v_next[1,:],par,state2)
-        res_2 = optimize.minimize_scalar(obj_fun, bounds=[0+1.0e-4, m+1.0e-4], method='bounded')
+            # Minimize the minus the value function wrt consumption conditional on income state
+            obj_fun = lambda x : - value_of_choice(x,m,par.grid_m,v_next[y,:],par,y)
+            res = optimize.minimize_scalar(obj_fun, bounds=[0+1.0e-4, m+1.0e-4], method='bounded')
         
-        # Unpack solutions
-        # State 1
-        sol.v[0,m_i] = -res_1.fun
-        sol.c[0,m_i] = res_1.x
-
-        # State 2
-        sol.v[1,m_i] = -res_2.fun
-        sol.c[1,m_i] = res_2.x
+            # Unpack solutions
+            sol.v[y,m_i] = -res.fun
+            sol.c[y,m_i] = res.x
 
     return sol
 
-# Function that returns value of consumption choice conditional on the state
+# Function that returns value of consumption choice conditional on the income state
 def value_of_choice(x,m,m_next,v_next,par,state):
     
     # Unpack consumption (choice variable)
@@ -163,7 +155,7 @@ def value_of_choice(x,m,m_next,v_next,par,state):
 
     m_plus = par.y + (1 + par.r)*(m - c)
 
-    v_plus = tools.interp_linear_1d(m_next, v_next, m_plus) # Returns one point for each state
+    v_plus = tools.interp_linear_1d(m_next, v_next, m_plus) # Returns one point for each income state
 
     Ev_next = np.sum(par.P[state]*v_plus)
 
