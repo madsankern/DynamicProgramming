@@ -9,8 +9,8 @@ model.setup()
 model.create_grids()
 
 # Solve using NEGM
-model.solve_negm_dc()
-sol = model.sol_negm
+model.solve_egm()
+sol = model.sol_egm
 par = model.par
 
 # Plot
