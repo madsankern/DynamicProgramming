@@ -10,7 +10,7 @@ import fd
 import utility as util
 # import scipy.optimize as optimize
 import last_period
-import last_period_negm
+# import last_period_negm
 
 class model_class():
 
