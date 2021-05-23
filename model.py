@@ -60,7 +60,7 @@ class model_class():
         par.p1 = 2.0
 
         # Grid settings
-        par.Nm = 100 
+        par.Nm = 100
         par.m_max = 20.0
         par.m_min = 1e-4
 
@@ -73,9 +73,9 @@ class model_class():
         par.x_min = 1e-4
         
         par.max_iter = 1000
-        par.tol_vfi = 10e-6
-        par.tol_egm = 10e-6
-        par.tol_fd = 10e-8
+        par.tol_vfi = 1.0e-6
+        par.tol_egm = 1.0e-6
+        par.tol_fd = 1.0e-8
 
         par.N_bottom = 10 
 
@@ -117,7 +117,6 @@ class model_class():
         shape = (np.size(par.y),1) # Shape to fit nr of income states
         sol.c = np.tile(par.grid_a.copy(), shape) # Initial guess - consume all
         sol.v = util.u(sol.c,par) # Utility of consumption
-        sol.m = par.grid_m.copy() # Copy the exogenous asset grid for consistency (with EGM algortihm)
 
         sol.it = 0 # Iteration counters
         sol.delta = 1000.0 # Distance between iterations
