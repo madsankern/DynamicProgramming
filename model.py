@@ -37,9 +37,9 @@ class model_class():
         par = self.par
 
         # Model
-        par.beta =  0.99
+        par.beta =  0.96
         par.rho = 1/par.beta - 1
-        par.eta = 0.5
+        par.eta = 1.0
         
         par.r = 0.01
         par.y1 = 1.0
