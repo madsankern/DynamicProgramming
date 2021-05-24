@@ -233,13 +233,11 @@ class model_class():
         # Iterate value function until convergence or break if no convergence
         while (sol.delta >= par.tol_egm and sol.it < par.max_iter):
 
-            # Continuation value
-            c_next = sol.c.copy()
-            h_next = sol.h.copy()            
+            # Continuation value          
             v_next = sol.v.copy()
 
             # Solve the keeper problem
-            sol = vfi.solve_dc(sol, par, v_next, c_next, h_next)
+            sol = vfi.solve_dc(sol, par, v_next)
 
             sol.it += 1
             sol.delta = max( max(abs(sol.v[0] - v_next[0])), max(abs(sol.v[1] - v_next[1]))) # Update this maybe

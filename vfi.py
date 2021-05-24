@@ -30,7 +30,7 @@ def obj_keep(arg, n, m, v_next, par):
     return value
 
 # Solution algorithm
-def solve_dc(sol, par, v_next, c_next, h_next):
+def solve_dc(sol, par, v_next):
 
     # a. Solve the keeper problem
 
