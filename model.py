@@ -39,7 +39,7 @@ class model_class():
         # Model
         par.beta =  0.96
         par.rho = 1/par.beta - 1
-        par.eta = 1.0
+        par.eta = 2.0
         
         par.r = 0.01
         par.y1 = 1.0
@@ -60,9 +60,9 @@ class model_class():
         par.p1 = 2.0
 
         # Grid settings
-        par.Nm = 100
+        par.Nm = 500
         par.m_max = 20.0
-        par.m_min = 1e-4
+        par.m_min = 1e-6
 
         par.Na = par.Nm
         par.a_min = par.m_min
@@ -72,7 +72,7 @@ class model_class():
         par.x_max = par.m_max + par.ph # add price of selling house to the top of the x grid (grid when selling/buying house)
         par.x_min = 1e-4
         
-        par.max_iter = 1000
+        par.max_iter = 50
         par.tol_vfi = 1.0e-6
         par.tol_egm = 1.0e-6
         par.tol_fd = 1.0e-8
@@ -115,7 +115,7 @@ class model_class():
         
         # Initialize
         shape = (np.size(par.y),1) # Shape to fit nr of income states
-        sol.c = np.tile(par.grid_a.copy(), shape) # Initial guess - consume all
+        sol.c = np.tile(par.grid_m.copy(), shape) # Initial guess - consume all
         sol.v = util.u(sol.c,par) # Utility of consumption
 
         sol.it = 0 # Iteration counters
@@ -178,6 +178,14 @@ class model_class():
     ## Finite difference method ##
     ##############################
     
+    # def solve_fd(self):
+
+    #     # Initialize
+    #     par = self.par
+    #     sol = self.sol_fd
+
+    #     sol = fd.solve(par,sol)
+
     def solve_fd(self):
 
         # Initialize
@@ -185,6 +193,7 @@ class model_class():
         sol = self.sol_fd
 
         sol = fd.solve(par,sol)
+    
 
 
 ##########################################
