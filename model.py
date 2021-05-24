@@ -51,7 +51,9 @@ class model_class():
         par.P = np.array([[par.P_11, 1 - par.P_11], [1 - par.P_22, par.P_22]]) # Transition matrix
 
         # Poisson jumps - rewrite to correspond to P above
-        par.pi_list = [[-0.11, 0.11], [0.11, -0.11]]
+        par.lam1 = -np.log(par.P_11)
+        par.lam2 = -np.log(par.P_22)
+        par.pi_list = [[-par.lam1, par.lam1], [par.lam2, -par.lam2]]
         par.pi = np.asarray(par.pi_list)
 
         # Extra parameters for housing
