@@ -261,7 +261,7 @@ def solve(sol, par, c_next, m_next):
     # Expand exogenous asset grid
     a = np.tile(par.grid_a, np.size(par.y)) # does this work?
 
-    m_plus = (1+par.r)
+    # m_plus = (1+par.r)
 
     # Loop over exogneous states (post decision states)
     for a_i,a in enumerate(par.grid_a):
