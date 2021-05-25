@@ -119,6 +119,7 @@ class model_class():
         shape = (np.size(par.y),1) # Shape to fit nr of income states
         sol.c = np.tile(par.grid_m.copy(), shape) # Initial guess - consume all
         sol.v = util.u(sol.c,par) # Utility of consumption
+        sol.m = par.grid_m
 
         sol.it = 0 # Iteration counters
         sol.delta = 1000.0 # Distance between iterations
@@ -126,7 +127,7 @@ class model_class():
         # Iterate untill convergence
         while (sol.delta >= par.tol_vfi and sol.it < par.max_iter):
             
-            # Use last iteration as the continuation value. See slides if confused
+            # Use last iteration as the continuat   ion value. See slides if confused
             v_next = sol.v.copy()
 
             # Find optimal c given v_next
