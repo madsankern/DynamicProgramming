@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import sparse
 from scipy.sparse.linalg import spsolve
+import time
 
 # Local modules
 import utility as util
@@ -13,26 +14,22 @@ import LCP_solver
 # Solve the discrete-continuous problem using linear complementarity
 # There is still a bit of work left for this
 
-# Temporary utility function
-def u(c):
-    return c**(1.0 - 2.0)/(1.0 - 2.0)
-
 s = 2 # Elasticity of substitution 
 r = 0.045 # Rate of return
 rho = 0.05 # Discount rate
-y = 0.1 # Income
-kappa = 0.2 # Housing utility
-p0 = 1.0 #buying price
-p1 = .5 #selling price
+y = .5 # Income
+kappa = 0.25 # Housing utility
+p0 = 2.0 #buying price
+p1 = 1.7 #selling price
 
-I = 500 # Gridpoints on asset grid
+I = 4000 # Gridpoints on asset grid - set to 500 normally
 amin = 1e-8 # Minimum assets
 amax = 10 # Maximum assets
 a = np.linspace(amin,amax,I).transpose() # a grid
 da = (amax-amin)/(I-1) # Stepsize for a
 
-maxit = 20 # Max number of iterations
-crit = 1e-3 # Stopping criteria
+maxit = 10 # Max number of iterations
+crit = 1e-6 # Stopping criteria
 it = 0
 
 Delta = 1000 # Stepsize
@@ -43,7 +40,7 @@ dVf = np.zeros((I,2))
 dVb = np.zeros((I,2))
 c = np.zeros((I,2))
 Vstar = np.zeros((I,2))
-u_of_choice = np.zeros((I,2))
+u= np.zeros((I,2))
 A = sparse.eye(2*I, format = 'csr') # Transition matrix
 
 # Double grid of assets
@@ -54,7 +51,6 @@ yy = y*np.ones((I,2)) # 2 dimensional income grid
 # INITIAL GUESS
 v0 = np.power((yy + r*aa), 1-s)/((1-s)*rho) # value of initial guess from HJB, double check
 v = v0
-
 
 ## RUN LOOP FROM HERE ##
 
@@ -81,6 +77,7 @@ while (delta >= crit and it < maxit):
     cb = np.power(dVb, -1/s)
     ssb = yy + r*aa - cb
 
+
     #consumption and derivative of value function at steady state
     c0 = yy + r*aa
 
@@ -92,15 +89,12 @@ while (delta >= crit and it < maxit):
     c = cf*If + cb*Ib + c0*I0
 
     # Use util function for this later
-    # u_of_choice[:,0] = np.power(c[:,0], (1-s))/(1-s) # Utility without car
-    # u_of_choice[:,1] = np.power(c[:,1], (1-s))/(1-s) + kappa # Utility with car
-    u_of_choice[:,0] = u(c[:,0]) # Utility without car
-    u_of_choice[:,1] = u(c[:,1]) + kappa # Utility with car
-
+    u[:,0] = np.power(c[:,0], (1-s))/(1-s) # Utility without car
+    u[:,1] = np.power(c[:,1], (1-s))/(1-s) + kappa # Utility with car
 
     # Terms to be put into the A matrix
     X = -np.minimum(ssb,0)/da
-    Y = -np.maximum(ssf,0)/da + np.minimum(ssb,0)/da
+    Y = np.maximum(ssf,0)/da + np.minimum(ssb,0)/da
     Z = np.maximum(ssf,0)/da
     Z_helper = np.vstack((np.array([0,0]), Z))
 
@@ -120,12 +114,12 @@ while (delta >= crit and it < maxit):
     A_upper = sparse.hstack([A1,block_helper], format = 'csr')
     A_lower = sparse.hstack([block_helper,A2], format = 'csr')
     A = sparse.vstack([A_upper,A_lower], format = 'csr') # This is the transition matrix used for the problem
-        
+
     # B matrix
     B = (rho + 1/Delta)*sparse.eye(2*I) - A
 
     # Stack utility vector into one long column vector
-    u_stacked = np.hstack(([u_of_choice[:,0]], [u_of_choice[:,1]])).transpose()
+    u_stacked = np.hstack(([u[:,0]], [u[:,1]])).transpose()
     V_stacked = np.hstack(([V[:,0]], [V[:,1]])).transpose()
 
     # Outside option
@@ -154,11 +148,11 @@ while (delta >= crit and it < maxit):
 
     # using Yuval Tassa's Newton-based LCP solver, download from http://www.mathworks.com/matlabcentral/fileexchange/20952
     z0 = V_stacked - Vstar_stacked
-    l = np.zeros(2*I) #+ 1e-6 # added small term for numerics
-    upper = np.inf*np.ones(2*I) ## Upper limit on consumption
+    l = np.zeros(2*I) + 1e-6 # added small term for numerics
+    u_ = np.inf*np.ones(2*I)
 
     # Seems to work now
-    z = LCP_solver.LCP_python(M=B, q=q, l=l, u = upper, x0=z0, display=False)
+    z = LCP_solver.LCP_python(B,q,l,u_,z0,0)
 
     # LCP_error = np.max(abs(z*(B*z + q)))
 
@@ -178,59 +172,59 @@ while (delta >= crit and it < maxit):
     #     print(it)
     #     break
 
-    it += 1
+    it += 1 
 
 
-# ## PLOT RESULTS ##
-# plt.rc('font', family='serif')
-# plt.rc('text', usetex=True)
+## PLOT RESULTS ##
+plt.rc('font', family='serif')
+plt.rc('text', usetex=True)
 
-# # Consumption
-# fig = plt.figure(figsize=(5,3))
-# ax = fig.add_subplot(1,1,1)
+# Consumption
+fig = plt.figure(figsize=(5,3))
+ax = fig.add_subplot(1,1,1)
 
-# ax.grid(b=True, which = 'major', linestyle='-', linewidth=0.5, color='0.7')
-# ax.set_xlim([0.0,10])
-# ax.set_ylim([.1,.6])
-# ax.set_xlabel(r'Cash on Hand, $m_t$', size=12)
-# # ax.set_ylabel(r'Consumption, $c_t$', size=12)
+ax.grid(b=True, which = 'major', linestyle='-', linewidth=0.5, color='0.9')
+ax.set_xlim([0.0,10])
+ax.set_ylim([0.5,1.0])
+ax.set_xlabel(r'Cash on Hand, $m_t$', size=12)
+# ax.set_ylabel(r'Consumption, $c_t$', size=12)
 
-# ax.plot(a[1:-1],c[1:-1,0], label= r'Not having a house', linestyle = '-', color = '0.4')
-# ax.plot(a[1:-1],c[1:-1,1], label= r'Having a house', linestyle = '--', color = '0.4')
+ax.plot(a[1:-1],c[1:-1,0], label= r'Not having a house', linestyle = '-', color = '0.4')
+ax.plot(a[1:-1],c[1:-1,1], label= r'Having a house', linestyle = '--', color = '0.4')
 
-# ax.legend(frameon = True, edgecolor = 'k', facecolor = 'white', framealpha=1, fancybox=False, loc = 2)
+ax.legend(frameon = True, edgecolor = 'k', facecolor = 'white', framealpha=1, fancybox=False, loc = 2)
 # plt.savefig('figs/fd_dc_policy.pdf')
 
-# # Value function
-# fig = plt.figure(figsize=(5,3))
-# ax = fig.add_subplot(1,1,1)
+# Value function
+fig = plt.figure(figsize=(5,3))
+ax = fig.add_subplot(1,1,1)
 
-# ax.grid(b=True, which = 'major', linestyle='-', linewidth=0.5, color='0.7')
-# ax.set_xlim([0.0,10])
-# ax.set_ylim([-200,-25])
-# ax.set_xlabel(r'Cash on Hand, $m_t$', size=12)
-# # ax.set_ylabel(r'Consumption, $c_t$', size=12)
+ax.grid(b=True, which = 'major', linestyle='-', linewidth=0.5, color='0.9')
+ax.set_xlim([0.0,10])
+ax.set_ylim([-40,-15])
+ax.set_xlabel(r'Cash on Hand, $m_t$', size=12)
+# ax.set_ylabel(r'Consumption, $c_t$', size=12)
 
-# ax.plot(a[1:-1],v[1:-1,0], label= r'Not having a house', linestyle = '-', color = '0.4')
-# ax.plot(a[1:-1],v[1:-1,1], label= r'Having a house', linestyle = '--', color = '0.4')
+ax.plot(a[1:-1],v[1:-1,0], label= r'Not having a house', linestyle = '-', color = '0.4')
+ax.plot(a[1:-1],v[1:-1,1], label= r'Having a house', linestyle = '--', color = '0.4')
 
-# ax.legend(frameon = True, edgecolor = 'k', facecolor = 'white', framealpha=1, fancybox=False, loc = 2)
+ax.legend(frameon = True, edgecolor = 'k', facecolor = 'white', framealpha=1, fancybox=False, loc = 2)
 # plt.savefig('figs/fd_dc_value.pdf')
 
-# # Discrete choice
-# action = (V == Vstar)
+# Discrete choice
+action = (np.around(V,3) == np.around(Vstar,3))
 
-# fig = plt.figure(figsize=(5,3))
-# ax = fig.add_subplot(1,1,1)
+fig = plt.figure(figsize=(5,3))
+ax = fig.add_subplot(1,1,1)
 
-# ax.grid(b=True, which = 'major', linestyle='-', linewidth=0.5, color='0.7')
-# ax.set_xlim([0.0,10])
-# ax.set_ylim([-0.1,1.4])
-# ax.set_xlabel(r'Cash on Hand, $m_t$', size=12)
-# # ax.set_ylabel(r'Consumption, $c_t$', size=12)
+ax.grid(b=True, which = 'major', linestyle='-', linewidth=0.5, color='0.9')
+ax.set_xlim([-1,10])
+ax.set_ylim([-0.1,1.4])
+ax.set_xlabel(r'Cash on Hand, $m_t$', size=12)
+# ax.set_ylabel(r'Consumption, $c_t$', size=12)
 
-# ax.plot(a[1:-1],action[1:-1,0], label= r'Buying a house', linestyle = '-', color = '0.4')
-# ax.plot(a[1:-1],action[1:-1,1], label= r'Selling a house', linestyle = '--', color = '0.4')
+ax.plot(a[0:-1],action[0:-1,0], label= r'Buying a house', linestyle = '-', color = '0.4')
+ax.plot(a[0:-1],action[0:-1,1], label= r'Selling a house', linestyle = '--', color = '0.4')
 
-# ax.legend(frameon = True, edgecolor = 'k', facecolor = 'white', framealpha=1, fancybox=False, loc = 2)
+ax.legend(frameon = True, edgecolor = 'k', facecolor = 'white', framealpha=1, fancybox=False, loc = 2)
 # plt.savefig('figs/fd_dc_action.pdf')
