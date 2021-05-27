@@ -48,7 +48,7 @@ def solve_dc(sol, par, v_next):
         for m_i,m in enumerate(par.grid_m):
 
             # High and low bounds
-            c_low =  1e-4 #np.fmin(m/2,1e-6)
+            c_low =  1e-10 #np.fmin(m/2,1e-6)
             c_high = m
 
             # Call optimizer
