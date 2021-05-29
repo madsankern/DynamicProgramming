@@ -1,18 +1,24 @@
 To do (computational):
-(partly) Vectorize 2d egm (done)
-Solve vfi for discrete state markov process (done)
-Implement continuous time method (done)
-Rename model_1d.py to 'model.py'
-Vectorize EGM for the simple problem
-Ensure the EGM-DC model works as intended
+Vectorize EGM for the simple problem [Optional: Julius]
+Multi-start for NVFI (high-prio) 
+FOR-loop in UpperEnvelope (low-prio) [Optional: Julius]
 
 To do (theoretical):
-Theoretical convergence properties of time iteration and hence egm
-Intuition for why intensities must sum to 0 for continuous poisson jump process
-Think about limitations for comparison between the algorithms
-Consider whether the continuous time solution is robust to small changes in the model
-Plot distance parameter for each state value function to determine whether one converges faster
-
-Questions for Thomas:
-- Infinite horizon for EGM (value function convergence possible?)
-- Why use finite (T=50) for upper envelope models
+Theoretical convergence properties of time iteration and hence egm (refer to Thomas' article) [Mads A]
+Save delta in 'sol': Plot distance parameter for each state value function to determine whether one converges faster (good idea) [Mads W]
+Write Find_V in both VFI and NVFI; Important: remember to use same notation as other algorithms [Julius]
+Write pseudo-code for continuous time [Mads A]
+Move algorithms to the right place [Mads W]
+Write about "adding points at the constraints" in NEGM [Julius]
+Algorithm 1: rewrite (without bullets) [Mads W]
+Algorithm 2: rewrite "add zero's" [Mads W]
+Rewrite equations (2.13)-(2.15): No primes, and instead with t's and t+1's + add functional form (instead of general form) [Julius]
+Algorithms + text: match tolerance levels actually used [Mads W]
+Results for DC-EGM model: write parameter specifications actually used [Mads A]
+Appendix: make nice [Mads A]
+Algorithms: check that text matches algorithm (do we adequately describe each step?) [Mads W]
+Introduction: write it out [1- 1,5 page] [Mads A]
+Conclusion: write it out [0.5 page - summary + further perspectives] [Postpone to 4th of June]
+Abstract: [Postpone to 4th of June]
+FD-algorithms: a little more detail in a pedagogical manner [Mads A]
+[Optional: for given m, plot c on x-axis and obj_keep on y-axis; similar to Thomas' arguing for needing multistart in VFI]
