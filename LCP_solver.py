@@ -12,7 +12,7 @@ import scipy.sparse as sparse
 from scipy.sparse.linalg import spsolve
 
 def LCP_python(M,q,l=[],u=[],x0=[],display=False):   
-    tol            = 1.0e-8;
+    tol            = 1.0e-6;
     mu             = 1e-3;
     mu_step        = 5;
     mu_min         = 1e-5;
