@@ -1,7 +1,7 @@
 To do (computational):
-Vectorize EGM for the simple problem [Optional: Julius]
-Multi-start for NVFI (high-prio) 
-FOR-loop in UpperEnvelope (low-prio) [Optional: Julius]
+Vectorize EGM for the simple problem [Julius]
+Multi-start for NVFI (high-prio) [Postpone]
+FOR-loop in UpperEnvelope (low-prio) [Julius]
 
 To do (theoretical):
 Theoretical convergence properties of time iteration and hence egm (refer to Thomas' article) [Mads A]
