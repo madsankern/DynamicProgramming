@@ -6,7 +6,7 @@ FOR-loop in UpperEnvelope (low-prio) [Julius]
 To do (theoretical):
 Sanity check comparisons between NEGM and FD: they should both be below 10 seconds (done)
 Theoretical convergence properties of time iteration and hence egm (refer to Thomas' article) (done)
-Save delta in 'sol': Plot distance parameter for each state value function to determine whether one converges faster (done)
+Save delta in 'sol': Plot distance parameter for each state value function to determine whether one converges faster [Mads W] (done)
 Write Find_V in both VFI and NVFI; Important: remember to use same notation as other algorithms [Julius]
 Write pseudo-code for continuous time [Mads A] (done)
 Move algorithms to the right place [Mads W]
