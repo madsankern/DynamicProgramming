@@ -151,6 +151,8 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
                 sol.h[n,a_i] = 1 - n
                 sol.m[n,a_i] = m_grid_append[n,a_i] # added
                 
+    for i in range(2):
+        sol.delta_save[i, sol.it] = max(abs(sol.v[i] - v_next[i]))
 
     return sol
     

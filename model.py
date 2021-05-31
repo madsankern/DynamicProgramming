@@ -264,6 +264,7 @@ class model_class():
         sol.c = np.zeros(shape) + np.nan
         sol.h = np.zeros(shape) + np.nan
         sol.v = np.zeros(shape) + np.nan
+        sol.delta_save = np.zeros((2, 10000)) + np.nan
 
         # Solve last period
         last_period.solve(sol,par)
