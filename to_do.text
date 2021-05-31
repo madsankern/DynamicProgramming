@@ -10,10 +10,10 @@ Save delta in 'sol': Plot distance parameter for each state value function to de
 Write Find_V in both VFI and NVFI; Important: remember to use same notation as other algorithms [Julius]
 Write pseudo-code for continuous time [Mads A] (done)
 Move algorithms to the right place [Mads W]
-Write about "adding points at the constraints" in NEGM [Julius]
+Write about "adding points at the constraints" in NEGM [Julius] (done)
 Algorithm 1: rewrite (without bullets) [Mads W]
 Algorithm 2: rewrite "add zero's" [Mads W]
-Rewrite equations (2.13)-(2.15): No primes, and instead with t's and t+1's + add functional form (instead of general form) [Julius]
+Rewrite equations (2.13)-(2.15): No primes, and instead with t's and t+1's + add functional form (instead of general form) [Julius] (done)
 Algorithms + text: match tolerance levels actually used [Mads W]
 Results for DC-EGM model: write parameter specifications actually used [Mads A] (done)
 Appendix: make nice [Mads A]
