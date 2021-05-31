@@ -120,6 +120,9 @@ def solve_dc(sol, par, v_next):
                 sol.c[n,m_i] = c_adj[n,m_i]
                 sol.h[n,m_i] = 1 - n
     
+    for i in range(2):
+        sol.delta_save[i, sol.it] = max(abs(sol.v[i] - v_next[i]))
+
     return sol
 
 

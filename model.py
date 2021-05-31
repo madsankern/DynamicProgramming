@@ -37,9 +37,9 @@ class model_class():
         par = self.par
 
         # Model
-        par.beta =  0.96
+        par.beta =  0.93
         par.rho = 1/par.beta - 1
-        par.eta = 2.0
+        par.eta = 1.0
         
         par.r = 0.01
         par.y1 = 1.0
@@ -224,6 +224,7 @@ class model_class():
         sol.c = np.zeros(shape) + np.nan
         sol.h = np.zeros(shape) + np.nan
         sol.v = np.zeros(shape) + np.nan
+        sol.delta_save = np.zeros((2, 1000)) + np.nan
 
         # Solve last period
         last_period.solve(sol,par)
@@ -264,7 +265,7 @@ class model_class():
         sol.c = np.zeros(shape) + np.nan
         sol.h = np.zeros(shape) + np.nan
         sol.v = np.zeros(shape) + np.nan
-        sol.delta_save = np.zeros((2, 10000)) + np.nan
+        sol.delta_save = np.zeros((2, 1000)) + np.nan
 
         # Solve last period
         last_period.solve(sol,par)
