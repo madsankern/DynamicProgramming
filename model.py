@@ -171,16 +171,13 @@ class model_class():
             sol = egm.solve(sol, par, c_next, m_next)
 
             # add zero consumption (not really necessary for current initial guess, where everything is consumed)
-            # sol.m[:,0] = 1e-4
-            # sol.c[:,0] = 1e-4
+            sol.m[:,0] = 1e-6
+            sol.c[:,0] = 1e-6
 
             #Compute value function and update iteration parameters [is currently coded inside the EGM step]
             #sol.delta = max( max(abs(sol.v[0] - v_old[0])), max(abs(sol.v[1] - v_old[1])))
             #sol.it += 1
 
-        # add zero consumption (not really necessary for current initial guess, where everything is consumed)
-        # sol.m[:,0] = 1e-4
-        # sol.c[:,0] = 1e-4
 
     ##############################
     ## Finite difference method ##
