@@ -13,6 +13,7 @@ Move algorithms to the right place [Mads W] (done)
 Write about "adding points at the constraints" in NEGM [Julius] (done)
 Algorithm 1: rewrite (without bullets) [Mads W] (done)
 Algorithm 2: rewrite "add zero's" [Mads W] (done)
+Write delta correctly in algorithms [Mads W] [done]
 Rewrite equations (2.13)-(2.15): No primes, and instead with t's and t+1's + add functional form (instead of general form) [Julius] (done)
 Algorithms + text: match tolerance levels actually used [Mads W] (done)
 Results for DC-EGM model: write parameter specifications actually used [Mads A] (done)
