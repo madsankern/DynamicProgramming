@@ -173,7 +173,7 @@ class model_class():
             #sol.delta = max( max(abs(sol.v[0] - v_old[0])), max(abs(sol.v[1] - v_old[1])))
             #sol.it += 1
 
-        # add zero consumption
+        # add zero consumption (not necessary for current initial guess, where everything is consumed)
         sol.m[:,0] = 1.0e-4
         sol.c[:,0] = 1.0e-4
 

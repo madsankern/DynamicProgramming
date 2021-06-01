@@ -287,7 +287,7 @@ def solve(sol, par, c_next, m_next):
         sol.m[:,a_i+1] = a + sol.c[:,a_i+1]
         sol.v = util.u(sol.c,par)
 
-    #Compute valu function and update iteration parameters
+    #Compute value function and update iteration parameters
     sol.delta = max( max(abs(sol.v[0] - v_old[0])), max(abs(sol.v[1] - v_old[1])))
     sol.it += 1
 
