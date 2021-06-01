@@ -174,8 +174,8 @@ class model_class():
             #sol.it += 1
 
         # add zero consumption
-        # sol.m[:,0] = 1.0e-4
-        # sol.c[:,0] = 1.0e-4
+        sol.m[:,0] = 1.0e-4
+        sol.c[:,0] = 1.0e-4
 
     ##############################
     ## Finite difference method ##
