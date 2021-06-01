@@ -169,13 +169,13 @@ class model_class():
             # Call EGM function here
             sol = egm.solve(sol, par, c_next, m_next)
 
-            #Compute valu function and update iteration parameters [is currently coded inside the EGM step]
+            #Compute value function and update iteration parameters [is currently coded inside the EGM step]
             #sol.delta = max( max(abs(sol.v[0] - v_old[0])), max(abs(sol.v[1] - v_old[1])))
             #sol.it += 1
 
         # add zero consumption
-        sol.m[:,0] = 1.0e-4
-        sol.c[:,0] = 1.0e-4
+        # sol.m[:,0] = 1.0e-4
+        # sol.c[:,0] = 1.0e-4
 
     ##############################
     ## Finite difference method ##
