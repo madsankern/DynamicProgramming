@@ -11,6 +11,7 @@ Write Find_V in both VFI and NVFI; Important: remember to use same notation as o
 Write pseudo-code for continuous time [Mads A] (done)
 Move algorithms to the right place [Mads W] (done)
 Write about "adding points at the constraints" in NEGM [Julius] (done)
+Write about "adding zero at the bottom" in standard EGM
 Algorithm 1: rewrite (without bullets) [Mads W] (done)
 Algorithm 2: rewrite "add zero's" [Mads W] (done)
 Write delta correctly in algorithms [Mads W] [done]
