@@ -9,12 +9,12 @@ Theoretical convergence properties of time iteration and hence egm (refer to Tho
 Save delta in 'sol': Plot distance parameter for each state value function to determine whether one converges faster [Mads W] (done)
 Write Find_V in both VFI and NVFI; Important: remember to use same notation as other algorithms [Julius]
 Write pseudo-code for continuous time [Mads A] (done)
-Move algorithms to the right place [Mads W]
+Move algorithms to the right place [Mads W] (done)
 Write about "adding points at the constraints" in NEGM [Julius] (done)
-Algorithm 1: rewrite (without bullets) [Mads W]
-Algorithm 2: rewrite "add zero's" [Mads W]
+Algorithm 1: rewrite (without bullets) [Mads W] (done)
+Algorithm 2: rewrite "add zero's" [Mads W] (done)
 Rewrite equations (2.13)-(2.15): No primes, and instead with t's and t+1's + add functional form (instead of general form) [Julius] (done)
-Algorithms + text: match tolerance levels actually used [Mads W]
+Algorithms + text: match tolerance levels actually used [Mads W] (done)
 Results for DC-EGM model: write parameter specifications actually used [Mads A] (done)
 Appendix: make nice [Mads A]
 Algorithms: check that text matches algorithm (do we adequately describe each step?) [Mads W]
