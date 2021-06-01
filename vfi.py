@@ -134,11 +134,13 @@ def solve_dc(sol, par, v_next):
 
 def solve(sol, par, v_next):
 
-    # Loop over asset grid
-    for m_i,m in enumerate(par.grid_m):
 
-        # Loop over income states
-        for y in range(2):
+    # Loop over income states
+    for y in range(2):
+    
+        # Loop over asset grid
+        for m_i,m in enumerate(par.grid_m):
+        
 
             # Minimize the minus the value function wrt consumption conditional on income state
             obj_fun = lambda x : - value_of_choice(x,m,par.grid_m,v_next[y,:],par,y)
