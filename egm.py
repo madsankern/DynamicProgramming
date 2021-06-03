@@ -280,7 +280,8 @@ def solve(sol, par, c_next, m_next):
 
         # Marginal utility
         marg_u_plus = util.marg_u(c_plus,par)
-        av_marg_u_plus = np.sum(par.P*marg_u_plus, axis = 1) # Dot product by row (axis = 1)
+        # av_marg_u_plus = np.sum(par.P*marg_u_plus, axis = 1) # Dot product by row (axis = 1) # OLD
+        av_marg_u_plus = np.array([par.P[0,0]*marg_u_plus[0,0] + par.P[0,1]*marg_u_plus[1,1], par.P[1,1]*marg_u_plus[1,1] + par.P[1,0]*marg_u_plus[0,0]]) # NEW
 
         # Add optimal consumption and endogenous state
         sol.c[:,a_i+1] = util.inv_marg_u((1+par.r)*par.beta*av_marg_u_plus,par)
