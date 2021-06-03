@@ -53,14 +53,11 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
             #av_marg_u_plus = np.sum(par.P*marg_u_plus, axis = 1) # Dot product by row (axis = 1) #### no average
 
             # Add optimal consumption and endogenous state using Euler equation
-            
-            #sol.c[:,a_i+1] = util.inv_marg_u((1+par.r)*par.beta*av_marg_u_plus,par)
-            #sol.m[:,a_i+1] = a + sol.c[:,a_i+1]
-            #sol.v = util.u(sol.c,par)
-             
             c_keep[n,a_i] = util.inv_marg_u((1+par.r)*par.beta*marg_u_plus,par) #### no average
-            v_keep[n,a_i] = obj_keep(c_keep[n,a_i], n, c_keep[n,a_i] + a, v_next[n,:], par, m_next[n, :]) # From par.N_bottom or whole grid?
-            h_keep[n,a_i] = n 
+            # v_keep[n,a_i] = obj_keep(c_keep[n,a_i], n, c_keep[n,a_i] + a, v_next[n,:], par, m_next[n, :])
+            # The line below is faster and more precise as it avoids numerical errors
+            v_keep[n,a_i] = util.u_h(c_keep[n,a_i],n,par) + par.beta*tools.interp_linear_1d_scalar(m_next[n,:], v_next[n,:], m_plus)
+            h_keep[n,a_i] = n
 
     ### UPPER ENVELOPE ###
 
@@ -94,6 +91,27 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
     m_grid_append[0, :] = np.append(m_con_0, m_grid[0, :])
     m_grid_append[1, :] = np.append(m_con_1, m_grid[1, :])
 
+    # ### Add points at the constraints ### NEW
+    # m_con = np.array([np.linspace(0+1e-8,m_grid[0,0]-1e-4,par.N_bottom), np.linspace(0+1e-8,m_grid[1,0]-1e-4,par.N_bottom)])
+    # c_con = m_con.copy()
+    # v_con_0 = [obj_keep(c_con[0,i],0,m_con[0,i],v_next[0, :], par, m_next[0, :]) for i in range(par.N_bottom)] # From N_bottom or whole
+    # v_con_1 = [obj_keep(c_con[1,i],1,m_con[1,i],v_next[1, :], par, m_next[1, :]) for i in range(par.N_bottom)] # From N_bottom or whole
+    # v_con = np.array([v_con_0, v_con_1])
+
+    # # initialize new larger keeper containers
+
+    # new_shape = (2,np.size(par.grid_a) + par.N_bottom)
+    # c_keep_append = np.zeros(new_shape) + np.nan
+    # v_keep_append = np.zeros(new_shape) + np.nan
+    # m_grid_append = np.zeros(new_shape) + np.nan
+
+    # # append
+
+    # for i in range(2):
+    #     c_keep_append[i, :] = np.append(c_con[i,:], c_keep[i, :])
+    #     v_keep_append[i, :] = np.append(v_con[i,:], v_keep[i, :])
+    #     m_grid_append[i, :] = np.append(m_con[i,:], m_grid[i, :])
+
     # b. Solve the adjuster problem
 
     # Initialize
@@ -108,7 +126,7 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
         h = 1 - n
 
         # Loop over asset grid
-        for a_i,m in enumerate(m_grid_append[n]): # endogenous grid or par.grid_m?
+        for a_i,m in enumerate(m_grid_append[n]): # endogenous grid
 
             # If adjustment is not possible
             if n == 0 and m < par.ph :
@@ -127,15 +145,15 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
                 x = m - p*(h - n)
 
                 # Value of choice
-                v_adj[n,a_i] = tools.interp_linear_1d_scalar(m_grid_append[h], v_keep_append[h,:], x) # endogenous grid or par.grid_m?
-                c_adj[n,a_i] = tools.interp_linear_1d_scalar(m_grid_append[h], c_keep_append[h,:], x) # endogenous grid or par.grid_m?
+                v_adj[n,a_i] = tools.interp_linear_1d_scalar(m_grid_append[h], v_keep_append[h,:], x) 
+                c_adj[n,a_i] = tools.interp_linear_1d_scalar(m_grid_append[h], c_keep_append[h,:], x) 
                 h_adj[n,a_i] = h
 
     # c. Combine solutions
 
     # Loop over asset grid again
     for n in range(2):
-        for a_i,m in enumerate(m_grid_append[n]): # endogenous grid or par.grid_m?
+        for a_i,m in enumerate(m_grid_append[n]): # endogenous grid
             
             # If keeping is optimal
             if v_keep_append[n,a_i] > v_adj[n,a_i]:
