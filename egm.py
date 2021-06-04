@@ -53,14 +53,11 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
             #av_marg_u_plus = np.sum(par.P*marg_u_plus, axis = 1) # Dot product by row (axis = 1) #### no average
 
             # Add optimal consumption and endogenous state using Euler equation
-            
-            #sol.c[:,a_i+1] = util.inv_marg_u((1+par.r)*par.beta*av_marg_u_plus,par)
-            #sol.m[:,a_i+1] = a + sol.c[:,a_i+1]
-            #sol.v = util.u(sol.c,par)
-             
             c_keep[n,a_i] = util.inv_marg_u((1+par.r)*par.beta*marg_u_plus,par) #### no average
-            v_keep[n,a_i] = obj_keep(c_keep[n,a_i], n, c_keep[n,a_i] + a, v_next[n,:], par, m_next[n, :]) # From par.N_bottom or whole grid?
-            h_keep[n,a_i] = n 
+            # v_keep[n,a_i] = obj_keep(c_keep[n,a_i], n, c_keep[n,a_i] + a, v_next[n,:], par, m_next[n, :])
+            # The line below is faster and more precise as it avoids numerical errors
+            v_keep[n,a_i] = util.u_h(c_keep[n,a_i],n,par) + par.beta*tools.interp_linear_1d_scalar(m_next[n,:], v_next[n,:], m_plus)
+            h_keep[n,a_i] = n
 
     ### UPPER ENVELOPE ###
 
@@ -94,6 +91,27 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
     m_grid_append[0, :] = np.append(m_con_0, m_grid[0, :])
     m_grid_append[1, :] = np.append(m_con_1, m_grid[1, :])
 
+    # ### Add points at the constraints ### NEW
+    # m_con = np.array([np.linspace(0+1e-8,m_grid[0,0]-1e-4,par.N_bottom), np.linspace(0+1e-8,m_grid[1,0]-1e-4,par.N_bottom)])
+    # c_con = m_con.copy()
+    # v_con_0 = [obj_keep(c_con[0,i],0,m_con[0,i],v_next[0, :], par, m_next[0, :]) for i in range(par.N_bottom)] # From N_bottom or whole
+    # v_con_1 = [obj_keep(c_con[1,i],1,m_con[1,i],v_next[1, :], par, m_next[1, :]) for i in range(par.N_bottom)] # From N_bottom or whole
+    # v_con = np.array([v_con_0, v_con_1])
+
+    # # initialize new larger keeper containers
+
+    # new_shape = (2,np.size(par.grid_a) + par.N_bottom)
+    # c_keep_append = np.zeros(new_shape) + np.nan
+    # v_keep_append = np.zeros(new_shape) + np.nan
+    # m_grid_append = np.zeros(new_shape) + np.nan
+
+    # # append
+
+    # for i in range(2):
+    #     c_keep_append[i, :] = np.append(c_con[i,:], c_keep[i, :])
+    #     v_keep_append[i, :] = np.append(v_con[i,:], v_keep[i, :])
+    #     m_grid_append[i, :] = np.append(m_con[i,:], m_grid[i, :])
+
     # b. Solve the adjuster problem
 
     # Initialize
@@ -108,7 +126,7 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
         h = 1 - n
 
         # Loop over asset grid
-        for a_i,m in enumerate(m_grid_append[n]): # endogenous grid or par.grid_m?
+        for a_i,m in enumerate(m_grid_append[n]): # endogenous grid
 
             # If adjustment is not possible
             if n == 0 and m < par.ph :
@@ -127,15 +145,15 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
                 x = m - p*(h - n)
 
                 # Value of choice
-                v_adj[n,a_i] = tools.interp_linear_1d_scalar(m_grid_append[h], v_keep_append[h,:], x) # endogenous grid or par.grid_m?
-                c_adj[n,a_i] = tools.interp_linear_1d_scalar(m_grid_append[h], c_keep_append[h,:], x) # endogenous grid or par.grid_m?
+                v_adj[n,a_i] = tools.interp_linear_1d_scalar(m_grid_append[h], v_keep_append[h,:], x) 
+                c_adj[n,a_i] = tools.interp_linear_1d_scalar(m_grid_append[h], c_keep_append[h,:], x) 
                 h_adj[n,a_i] = h
 
     # c. Combine solutions
 
     # Loop over asset grid again
     for n in range(2):
-        for a_i,m in enumerate(m_grid_append[n]): # endogenous grid or par.grid_m?
+        for a_i,m in enumerate(m_grid_append[n]): # endogenous grid
             
             # If keeping is optimal
             if v_keep_append[n,a_i] > v_adj[n,a_i]:
@@ -160,86 +178,131 @@ def solve_dc(sol, par, v_next, c_next, h_next, m_next):
 ## Upper envelope for NEGM ##
 #############################
 
+# def upper_envelope(c_keep, v_keep, v_next, m_next, shape, par):
+
+#     ## raw c, m and v for each housing state (can probably be written into a loop or vectorized)
+#     c_raw_0 = c_keep[0]
+#     c_raw_1 = c_keep[1]
+#     m_raw   = c_keep + par.grid_a 
+#     m_raw_0 = m_raw[0]
+#     m_raw_1 = m_raw[1]
+#     v_raw_0 = v_keep[0]
+#     v_raw_1 = v_keep[1]
+
+#     # This is all choices of c and associated value where the necessary condition of the euler is true.
+#     # In the upper envelope algorithm below, all non optimal choices are removed.
+
+#     ### first for housing state == 0 ###
+
+#     # Reorderining making G_m strictly increasing 
+#     m_0 = sorted(m_raw_0)  # alternatively, choose a common grid exogeneously. This, however, creates many points around the kink
+#     I_0 = m_raw_0
+#     c_0 = [x for _,x in sorted(zip(I_0,c_raw_0))]  # Here Thomas basically merges/zips the raw grids together, so that the c's and v's are associated with the correct m's
+#     v_0 = [x for _,x in sorted(zip(I_0,v_raw_0))]
+
+#     # Loop through the endogenous grid
+#     for i in range(np.size(m_raw_0)-2): # Why minus 2? 
+#         m_low_0 = m_raw_0[i]
+#         m_high_0 = m_raw_0[i+1]
+#         c_slope_0 = (c_raw_0[i+1]-c_raw_0[i])/(m_high_0-m_low_0)
+
+#         # Loop through the common grid
+#         for j in range(len(m_0)):
+
+#             if  m_0[j]>=m_low_0 and m_0[j]<=m_high_0:
+
+#                 c_guess_0 = c_raw_0[i] + c_slope_0*(m_0[j]-m_low_0)
+#                     # v_guess_0 = value_of_choice(m[j],c_guess,z_plus,t,sol,par) # value_of_choice should be changed to object_keep
+#                 v_guess_0 = obj_keep(c_guess_0, 0, m_0[j], v_next[0,par.N_bottom:], par, m_next[0,par.N_bottom:]) # check v_next
+
+#                     # Update
+#                 if v_guess_0 >v_0[j]:
+#                     v_0[j]=v_guess_0
+#                     c_0[j]=c_guess_0
+
+#     ### then for housing state == 1 ###
+
+#     # Reorderining making G_m strictly increasing 
+#     m_1 = sorted(m_raw_1)  # alternatively, choose a common grid exogeneously. This, however, creates many points around the kink
+#     I_1 = m_raw_1
+#     c_1 = [x for _,x in sorted(zip(I_1,c_raw_1))]  # Here Thomas basically merges/zips the raw grids together, so that the c's and v's are associated with the correct m's
+#     v_1 = [x for _,x in sorted(zip(I_1,v_raw_1))]
+
+#     # Loop through the endogenous grid
+#     for i in range(np.size(m_raw_1)-2): # Why minus 2? 
+#         m_low_1 = m_raw_1[i]
+#         m_high_1 = m_raw_1[i+1]
+#         c_slope_1 = (c_raw_1[i+1]-c_raw_1[i])/(m_high_1-m_low_1)
+
+#         # Loop through the common grid
+#         for j in range(len(m_1)):
+
+#             if  m_1[j]>=m_low_1 and m_1[j]<=m_high_1:
+
+#                 c_guess_1 = c_raw_1[i] + c_slope_1*(m_1[j]-m_low_1)
+#                 v_guess_1 = obj_keep(c_guess_1, 1, m_1[j], v_next[1,par.N_bottom:], par, m_next[1,par.N_bottom:]) # check v_next
+
+#                 # Update
+#                 if v_guess_1 >v_1[j]:
+#                     v_1[j]=v_guess_1
+#                     c_1[j]=c_guess_1                    
+
+#     #c = np.zeros(shape) + np.nan (old)
+#     c_keep[0] = c_0
+#     c_keep[1] = c_1
+#     #v = np.zeros(shape) + np.nan (old)
+#     v_keep[0] = v_0
+#     v_keep[1] = v_1
+#     m_grid = np.zeros(shape) + np.nan
+#     m_grid[0] = m_0
+#     m_grid[1] = m_1
+
+#     return c_keep, v_keep, m_grid
+
+
+ # NEW UPPER-ENVELOPE
 def upper_envelope(c_keep, v_keep, v_next, m_next, shape, par):
 
-    ## raw c, m and v for each housing state (can probably be written into a loop or vectorized)
-    c_raw_0 = c_keep[0]
-    c_raw_1 = c_keep[1]
-    m_raw   = c_keep + par.grid_a 
-    m_raw_0 = m_raw[0]
-    m_raw_1 = m_raw[1]
-    v_raw_0 = v_keep[0]
-    v_raw_1 = v_keep[1]
+    m_grid = np.zeros(shape) + np.nan
 
-    # This is all choices of c and associated value where the necessary condition of the euler is true.
-    # In the upper envelope algorithm below, all non optimal choices are removed.
+    for i in range(2):
 
-    ### first for housing state == 0 ###
+        c_raw = c_keep[i,:]
+        m_raw = c_raw + par.grid_a 
+        v_raw = v_keep[i,:]
 
-    # Reorderining making G_m strictly increasing 
-    m_0 = sorted(m_raw_0)  # alternatively, choose a common grid exogeneously. This, however, creates many points around the kink
-    I_0 = m_raw_0
-    c_0 = [x for _,x in sorted(zip(I_0,c_raw_0))]  # Here Thomas basically merges/zips the raw grids together, so that the c's and v's are associated with the correct m's
-    v_0 = [x for _,x in sorted(zip(I_0,v_raw_0))]
+        # This is all choices of c and associated value where the necessary condition of the euler holds.
+        # In the upper envelope algorithm below, all suboptimal choices are removed.
 
-    # Loop through the endogenous grid
-    for i in range(np.size(m_raw_0)-2): # Why minus 2? 
-        m_low_0 = m_raw_0[i]
-        m_high_0 = m_raw_0[i+1]
-        c_slope_0 = (c_raw_0[i+1]-c_raw_0[i])/(m_high_0-m_low_0)
+        # Reorderining making G_m strictly increasing 
+        m = sorted(m_raw)  # alternatively, choose a common grid exogeneously. This, however, creates many points around the kink
+        I = m_raw
+        c = [x for _,x in sorted(zip(I,c_raw))]  # Here Thomas basically merges/zips the raw grids together, so that the c's and v's are associated with the correct m's
+        v = [x for _,x in sorted(zip(I,v_raw))]
 
-        # Loop through the common grid
-        for j in range(len(m_0)):
+        # Loop through the endogenous grid
+        for q in range(np.size(m_raw)-2): # Why minus 2? 
+            m_low = m_raw[q]
+            m_high = m_raw[q+1]
+            c_slope = (c_raw[q+1]-c_raw[q])/(m_high-m_low)
 
-            if  m_0[j]>=m_low_0 and m_0[j]<=m_high_0:
+            # Loop through the common grid
+            for j in range(len(m)):
 
-                c_guess_0 = c_raw_0[i] + c_slope_0*(m_0[j]-m_low_0)
+                if  m[j]>=m_low and m[j]<=m_high:
+
+                    c_guess = c_raw[q] + c_slope*(m[j]-m_low)
                     # v_guess_0 = value_of_choice(m[j],c_guess,z_plus,t,sol,par) # value_of_choice should be changed to object_keep
-                v_guess_0 = obj_keep(c_guess_0, 0, m_0[j], v_next[0,par.N_bottom:], par, m_next[0,par.N_bottom:]) # check v_next
+                    v_guess = obj_keep(c_guess, 0, m[j], v_next[0,par.N_bottom:], par, m_next[0,par.N_bottom:]) # check v_next
 
                     # Update
-                if v_guess_0 >v_0[j]:
-                    v_0[j]=v_guess_0
-                    c_0[j]=c_guess_0
-
-    ### then for housing state == 1 ###
-
-    # Reorderining making G_m strictly increasing 
-    m_1 = sorted(m_raw_1)  # alternatively, choose a common grid exogeneously. This, however, creates many points around the kink
-    I_1 = m_raw_1
-    c_1 = [x for _,x in sorted(zip(I_1,c_raw_1))]  # Here Thomas basically merges/zips the raw grids together, so that the c's and v's are associated with the correct m's
-    v_1 = [x for _,x in sorted(zip(I_1,v_raw_1))]
-
-    # Loop through the endogenous grid
-    for i in range(np.size(m_raw_1)-2): # Why minus 2? 
-        m_low_1 = m_raw_1[i]
-        m_high_1 = m_raw_1[i+1]
-        c_slope_1 = (c_raw_1[i+1]-c_raw_1[i])/(m_high_1-m_low_1)
-
-        # Loop through the common grid
-        for j in range(len(m_1)):
-
-            if  m_1[j]>=m_low_1 and m_1[j]<=m_high_1:
-
-                c_guess_1 = c_raw_1[i] + c_slope_1*(m_1[j]-m_low_1)
-                v_guess_1 = obj_keep(c_guess_1, 1, m_1[j], v_next[1,par.N_bottom:], par, m_next[1,par.N_bottom:]) # check v_next
-
-                # Update
-                if v_guess_1 >v_1[j]:
-                    v_1[j]=v_guess_1
-                    c_1[j]=c_guess_1                    
-
-    #c = np.zeros(shape) + np.nan (old)
-    c_keep[0] = c_0
-    c_keep[1] = c_1
-    #v = np.zeros(shape) + np.nan (old)
-    v_keep[0] = v_0
-    v_keep[1] = v_1
-    m_grid = np.zeros(shape) + np.nan
-    m_grid[0] = m_0
-    m_grid[1] = m_1
-
-    return c_keep, v_keep, m_grid
+                    if v_guess >v[j]:
+                        v[j]=v_guess
+                        c[j]=c_guess
+        v_keep[i,:] = v
+        c_keep[i,:] = c
+        m_grid[i,:] = m
+    return c_keep, v_keep, m_grid    
 
 
 
@@ -280,7 +343,8 @@ def solve(sol, par, c_next, m_next):
 
         # Marginal utility
         marg_u_plus = util.marg_u(c_plus,par)
-        av_marg_u_plus = np.sum(par.P*marg_u_plus, axis = 1) # Dot product by row (axis = 1)
+        # av_marg_u_plus = np.sum(par.P*marg_u_plus, axis = 1) # Dot product by row (axis = 1) # OLD
+        av_marg_u_plus = np.array([par.P[0,0]*marg_u_plus[0,0] + par.P[0,1]*marg_u_plus[1,1], par.P[1,1]*marg_u_plus[1,1] + par.P[1,0]*marg_u_plus[0,0]]) # NEW
 
         # Add optimal consumption and endogenous state
         sol.c[:,a_i+1] = util.inv_marg_u((1+par.r)*par.beta*av_marg_u_plus,par)

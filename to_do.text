@@ -1,3 +1,24 @@
+****** 04/06-2021 **********
+
+- Algorithms: change capital M, A etc. to m, a etc.
+- Algorithsm: remove comments
+- Algorithms: change all G's to "krøllet G"
+- Algorithms: change all "to #_y - 1" instead of "to #_{y-1}"
+- Algorithms: change all delta's to new formulation
+- Algorithm 2: loop instead of vector (similar to the other algorithms)
+- Consistency regarding: "Cash on hand", "Cash-on-hand", "Assets", etc
+- Explain VFI in Section 2.3.1 (see comment)
+- Fix (1.14) in standard EGM
+- Add comment regarding decreasing importance of initial guess (add in VFI, and refer to it in EGM) (see comment on Mads A. page 9, bottom)
+- Timing ift. indkomst (figurer) "ikke lig hvad der står i kurven"
+
+
+
+
+
+***************************
+
+
 To do (computational):
 Vectorize EGM for the simple problem [Julius]
 Multi-start for NVFI (high-prio) [Postpone]
@@ -7,7 +28,7 @@ To do (theoretical):
 Sanity check comparisons between NEGM and FD: they should both be below 10 seconds (done)
 Theoretical convergence properties of time iteration and hence egm (refer to Thomas' article) (done)
 Save delta in 'sol': Plot distance parameter for each state value function to determine whether one converges faster [Mads W] (done)
-Write Find_V in both VFI and NVFI; Important: remember to use same notation as other algorithms [Julius]
+Write Find_V in both VFI and NVFI; Important: remember to use same notation as other algorithms [Julius] (done)
 Write pseudo-code for continuous time [Mads A] (done)
 Move algorithms to the right place [Mads W] (done)
 Write about "adding points at the constraints" in NEGM [Julius] (done)

@@ -143,7 +143,7 @@ def solve(sol, par, v_next):
         
 
             # Minimize the minus the value function wrt consumption conditional on income state
-            obj_fun = lambda x : - value_of_choice(x,m,par.grid_m,v_next[y,:],par,y)
+            obj_fun = lambda x : - value_of_choice(x,m,par.grid_m,v_next,par,y)
             res = optimize.minimize_scalar(obj_fun, bounds=[0+1.0e-4, m+1.0e-4], method='bounded')
         
             # Unpack solutions
@@ -160,11 +160,13 @@ def value_of_choice(x,m,m_next,v_next,par,state):
 
     m_plus = par.y + (1 + par.r)*(m - c)
 
-    v_plus = tools.interp_linear_1d(m_next, v_next, m_plus) # Returns one point for each income state
-
+    # v_plus = tools.interp_linear_1d(m_next, v_next, m_plus) # Returns one point for each income state # OLD
+    # NEW
+    v_plus = np.array([tools.interp_linear_1d_scalar(m_next, v_next[0,:], m_plus[0]), tools.interp_linear_1d_scalar(m_next, v_next[1,:], m_plus[1])]) # Returns one point for each income state
+    
     Ev_next = np.sum(par.P[state]*v_plus)
 
     # Value of choice given choice c = x
     value = util.u(c,par) + par.beta * Ev_next
-
+    
     return value
