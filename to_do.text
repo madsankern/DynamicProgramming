@@ -1,8 +1,10 @@
 ****** 04/06-2021 **********
 
-- Change algorithms from capital M, A etc. to m, a etc.
-- Remove comments from Algorithms
-- Change all G's to "krøllet G"
+- Algorithms: change capital M, A etc. to m, a etc.
+- Algorithsm: remove comments
+- Algorithms: change all G's to "krøllet G"
+- Algorithms: change all "to #_y - 1" instead of "to #_{y-1}"
+- Algorithms: change all delta's to new formulation
 - Consistency regarding: "Cash on hand", "Cash-on-hand", "Assets", etc
 - Explain VFI in Section 2.3.1 (see comment)
 
