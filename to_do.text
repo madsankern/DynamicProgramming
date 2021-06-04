@@ -6,6 +6,7 @@
 - Algorithms: change all "to #_y - 1" instead of "to #_{y-1}"
 - Algorithms: change all delta's to new formulation
 - Algorithm 2: loop instead of vector (similar to the other algorithms)
+- Algorithms: Fix find_v for both VFI and NVFI
 - Consistency regarding: "Cash on hand", "Cash-on-hand", "Assets", etc
 - Explain VFI in Section 2.3.1 (see comment)
 - Fix (1.14) in standard EGM
