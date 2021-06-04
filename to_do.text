@@ -1,3 +1,14 @@
+****** 04/06-2021 **********
+
+- Change algorithms from capital M, A etc. to m, a etc.
+- Consistency regarding: "Cash on hand", "Cash-on-hand", "Assets", etc
+
+
+
+
+***************************
+
+
 To do (computational):
 Vectorize EGM for the simple problem [Julius]
 Multi-start for NVFI (high-prio) [Postpone]
