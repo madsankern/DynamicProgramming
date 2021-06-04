@@ -1,6 +1,8 @@
 ****** 04/06-2021 **********
 
 - Change algorithms from capital M, A etc. to m, a etc.
+- Remove comments from Algorithms
+- Change all G's to "krøllet G"
 - Consistency regarding: "Cash on hand", "Cash-on-hand", "Assets", etc
 - Explain VFI in Section 2.3.1 (see comment)
 
