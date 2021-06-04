@@ -9,6 +9,7 @@
 - Consistency regarding: "Cash on hand", "Cash-on-hand", "Assets", etc
 - Explain VFI in Section 2.3.1 (see comment)
 - Fix (1.14) in standard EGM
+- Add comment regarding decreasing importance of initial guess (add in VFI, and refer to it in EGM) (see comment on Mads A. page 9, bottom)
 
 
 
