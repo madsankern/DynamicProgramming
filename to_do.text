@@ -8,6 +8,7 @@
 - Algorithm 2: loop instead of vector (similar to the other algorithms)
 - Algorithms: Fix find_v for both VFI and NVFI
 - Algorithms: change P to something else
+- Algorithms: refer to the computation of expectation for "Emu_+1"
 - Consistency regarding: "Cash on hand", "Cash-on-hand", "Assets", etc
 - Explain VFI in Section 2.3.1 (see comment)
 - Fix (1.14) in standard EGM
