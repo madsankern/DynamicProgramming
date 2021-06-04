@@ -1,24 +1,24 @@
 ****** 04/06-2021 ********** [TO BE DONE BEFORE 9th of June]
 
-- Algorithms: change capital M, A etc. to m, a etc.
-- Algorithsm: remove comments
-- Algorithms: change all G's to "krøllet G"
-- Algorithms: change all "to #_y - 1" instead of "to #_{y-1}"
-- Algorithms: change all delta's to new formulation
-- Algorithm 2: loop instead of vector (similar to the other algorithms)
-- Algorithms: Fix find_v for both VFI and NVFI
-- Algorithms: change P to something else
-- Algorithms: refer to the computation of expectation for "Emu_+1"
-- Consistency regarding: "Cash on hand", "Cash-on-hand", "Assets", etc
-- Explain VFI in Section 2.3.1 (see comment)
-- Fix (1.14) in standard EGM
-- Add comment regarding decreasing importance of initial guess (add in VFI, and refer to it in EGM) (see comment on Mads A. page 9, bottom)
-- Timing ift. indkomst (figurer) "ikke lig hvad der står i kurven"
-- Write conclusion
-- Write abstract
+- Algorithms: change capital M, A etc. to m, a etc. [Mads W]
+- Algorithsm: remove comments [Mads W]
+- Algorithms: change all G's to "krøllet G" [Mads W]
+- Algorithms: change all "to #_y - 1" instead of "to #_{y-1}" [Mads W]
+- Algorithms: change all delta's to new formulation [Mads W, FD done]
+- Algorithm 2: loop instead of vector (similar to the other algorithms) [Mads W]
+- Algorithms: Fix find_v for both VFI and NVFI [Mads W]
+- Algorithms: change P to something else [Mads W]
+- Algorithms: refer to the computation of expectation for "Emu_+1" [Julius]
+- Explain VFI in Section 2.3.1 (see comment) [Mads A]
+- Fix (1.14) in standard EGM [Mads A]
+- Add comment regarding decreasing importance of initial guess (add in VFI, and refer to it in EGM) (see comment on Mads A. page 9, bottom) [Mads A]
+- Timing ift. indkomst (figurer) "ikke lig hvad der står i kurven" [Julius]
+- Write conclusion [Julius]
+- Write abstract [Mads A]
 
-
-
+Optional:
+Vectorize EGM for the simple problem [Julius]
+Multi-start for NVFI (high-prio) [Postpone]
 
 
 ***************************
@@ -27,7 +27,7 @@
 To do (computational):
 Vectorize EGM for the simple problem [Julius]
 Multi-start for NVFI (high-prio) [Postpone]
-FOR-loop in UpperEnvelope (low-prio) [Julius]
+FOR-loop in UpperEnvelope (low-prio) [Julius] (done)
 
 To do (theoretical):
 Sanity check comparisons between NEGM and FD: they should both be below 10 seconds (done)
