@@ -127,7 +127,7 @@ class model_class():
         # Iterate untill convergence
         while (sol.delta >= par.tol_vfi and sol.it < par.max_iter):
             
-            # Use last iteration as the continuat   ion value. See slides if confused
+            # Use last iteration as the continuation value.
             v_next = sol.v.copy()
 
             # Find optimal c given v_next
@@ -222,7 +222,7 @@ class model_class():
         shape = (2,np.size(par.grid_m)) #  Row for each state of housing
 
         # Initialize
-        sol.m = np.tile(np.linspace(par.a_min,par.a_max,par.Na), (2,1)) # should it be 'par.Na+1' and should it be 'shape' instead of (2,1)?
+        sol.m = np.tile(np.linspace(par.a_min,par.a_max,par.Na), (2,1))
         sol.c = np.zeros(shape) + np.nan
         sol.h = np.zeros(shape) + np.nan
         sol.v = np.zeros(shape) + np.nan

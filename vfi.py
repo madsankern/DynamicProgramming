@@ -60,11 +60,6 @@ def solve_dc(sol, par, v_next):
             c_keep[n,m_i] = res.x
             h_keep[n,m_i] = n
 
-    ## For debugging ##
-    # plt.plot(par.grid_m,c_keep[1])
-    # plt.plot(par.grid_m,c_keep[0])
-    # plt.show()
-
     # b. Solve the adjuster problem
 
     # Intialize
@@ -160,9 +155,8 @@ def value_of_choice(x,m,m_next,v_next,par,state):
 
     m_plus = par.y + (1 + par.r)*(m - c)
 
-    # v_plus = tools.interp_linear_1d(m_next, v_next, m_plus) # Returns one point for each income state # OLD
-    # NEW
-    v_plus = np.array([tools.interp_linear_1d_scalar(m_next, v_next[0,:], m_plus[0]), tools.interp_linear_1d_scalar(m_next, v_next[1,:], m_plus[1])]) # Returns one point for each income state
+    # Line below returns one point for each income state
+    v_plus = np.array([tools.interp_linear_1d_scalar(m_next, v_next[0,:], m_plus[0]), tools.interp_linear_1d_scalar(m_next, v_next[1,:], m_plus[1])])
     
     Ev_next = np.sum(par.P[state]*v_plus)
 
