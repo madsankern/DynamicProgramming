@@ -8,11 +8,11 @@
 - Algorithm 2: loop instead of vector (similar to the other algorithms) [Mads W]
 - Algorithms: Fix find_v for both VFI and NVFI [Mads W]
 - Algorithms: change P to something else [Mads W]
-- Algorithms: refer to the computation of expectation for "Emu_+1" [Julius]
+- Algorithms: refer to the computation of expectation for "Emu_+1" [Julius] (Done)
 - Explain VFI in Section 2.3.1 (see comment) [Mads A]
 - Fix (1.14) in standard EGM [Mads A]
 - Add comment regarding decreasing importance of initial guess (add in VFI, and refer to it in EGM) (see comment on Mads A. page 9, bottom) [Mads A]
-- Timing ift. indkomst (figurer) "ikke lig hvad der står i kurven" [Julius]
+- Timing ift. indkomst (figurer) "ikke lig hvad der står i kurven" [Julius] (Done)
 - Write conclusion [Julius]
 - Write abstract [Mads A]
 
