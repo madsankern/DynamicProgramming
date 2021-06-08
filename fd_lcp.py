@@ -226,7 +226,7 @@ fig = plt.figure(figsize=(5,3))
 ax = fig.add_subplot(1,1,1)
 
 ax.grid(b=True, which = 'major', linestyle='-', linewidth=0.5, color='0.9')
-ax.set_xlim([-1,10])
+ax.set_xlim([-0.01,10])
 ax.set_ylim([-0.1,1.4])
 ax.set_xlabel(r'Cash on Hand, $m_t$', size=13)
 ax.set_ylabel(r'Consumption, $c_t$', size=13)
@@ -250,7 +250,7 @@ amax = 10 # Maximum assets
 a = np.linspace(amin,amax,I).transpose() # a grid
 da = (amax-amin)/(I-1) # Stepsize for a
 
-maxit = 10 # Max number of iterations
+maxit = 500 # Max number of iterations
 crit = 1e-6 # Stopping criteria
 it = 0
 
@@ -383,11 +383,8 @@ while (delta >= crit and it < maxit):
 
     Vchange = V - v
     v = V
-    # dist = np.amax(np.absolute(Vchange[:,0]))
-    # if dist < crit:
-    #     print('Value Function Converged, Iteration = ')
-    #     print(it)
-    #     break
+
+    delta = np.max(np.absolute(Vchange[:,:]))
 
     it += 1
 
