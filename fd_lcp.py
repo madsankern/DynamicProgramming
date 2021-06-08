@@ -32,7 +32,7 @@ amax = 10 # Maximum assets
 a = np.linspace(amin,amax,I).transpose() # a grid
 da = (amax-amin)/(I-1) # Stepsize for a
 
-maxit = 10 # Max number of iterations
+maxit = 500 # Max number of iterations
 crit = 1e-6 # Stopping criteria
 it = 0
 
