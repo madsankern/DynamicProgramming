@@ -169,7 +169,7 @@ while (delta >= crit and it < maxit):
     Vchange = V - v
     v = V
     
-    delta = np.amax(np.absolute(Vchange[:,:]))
+    delta = abs(max(max(Vchange[:,0], key=abs), max(Vchange[:,1], key=abs)))
 
 
     it += 1
