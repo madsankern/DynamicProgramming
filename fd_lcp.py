@@ -168,11 +168,9 @@ while (delta >= crit and it < maxit):
 
     Vchange = V - v
     v = V
-    # dist = np.amax(np.absolute(Vchange[:,0]))
-    # if dist < crit:
-    #     print('Value Function Converged, Iteration = ')
-    #     print(it)
-    #     break
+    
+    delta = np.amax(np.absolute(Vchange[:,:]))
+
 
     it += 1
 t1 = time.time()
